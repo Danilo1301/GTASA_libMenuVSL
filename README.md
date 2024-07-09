@@ -1,5 +1,11 @@
 # MenuVSL
 
+<h1>Required</h1>
+
+* libAML.so (https://github.com/RusJJ/AndroidModLoader)
+* libCLEOMod.so (https://github.com/AndroidModLoader/GTA_CLEOMod)
+* libSAUtils.so (optional) (https://github.com/AndroidModLoader/SAUtils)
+    
 <h1>How to install</h1>
 
 1. Download the **MenuVSL-0.0.0.zip** file in [Releases](https://github.com/Danilo1301/GTASA_libMenuVSL/releases)
