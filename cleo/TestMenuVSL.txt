@@ -1,0 +1,69 @@
+{$CLEO .csi}
+
+:DEMOTEXT
+03A4: name_thread "TestMenuVSL"
+wait 0
+
+:DEMOTEXT_1
+wait 0
+if
+0256: player $PLAYER_CHAR defined 
+004D: jump_if_false @DEMOTEXT_1
+
+//0FE1: $ID = menu_vsl_test 5 "nice text"
+
+0FEB: menu_vsl_set_debug_visible 1
+0FEC: menu_vsl_add_debug_int "Test debug ~1~ (with int)" 123
+0FEC: menu_vsl_add_debug_int "Test debug (string only)" 0
+0FED: menu_vsl_add_debug_float "Test debug ~1~ (with float)" 0.32
+
+0FE0: $Window1 = menu_vsl_add_window title "Nice window" x 450 y 200
+0FEF: menu_vsl_set_window_background window $Window1 r 108 g 94 b 229 a 255
+
+//01E3: show_text_1number_styled GXT 'MVSL1' number $Window1 time 1000 style 1
+
+0FE2: $Text1 = menu_vsl_add_text window $Window1 text "My ~y~color~r~ful ~w~text! :D"
+01E3: show_text_1number_styled GXT 'MVSL2' number $Text1 time 1000 style 1
+
+04C4: store_coords_to $X $Y $Z from_actor $PLAYER_ACTOR with_offset 0.0 0.0 0.0
+
+0FE7: $FloatRange1 = menu_vsl_add_float_range window $Window1 text "My float range" value $X min -10000.0 max 10000.0 add_by 1.0
+0FEA: menu_vsl_set_hold_to_change item $FloatRange1 value 1
+
+0FE6: $IntRange1 = menu_vsl_add_int_range window $Window1 text "My int range" value 25 min 0 max 100 add_by 1
+//01E3: show_text_1number_styled GXT 'MVSL2' number $IntRange1 time 1000 style 1
+
+$CheckboxValue = 1
+
+0FEE: $Checkbox1 = menu_vsl_add_checkbox window $Window1 text "My checkbox" value $CheckboxValue
+
+0FE3: $Button1 = menu_vsl_add_button window $Window1 text "~w~> ~r~Close"
+//01E3: show_text_1number_styled GXT 'MVSL2' number $Button1 time 1000 style 1
+
+:LOOP
+wait 0 
+ 
+if 0FE4: menu_vsl_is_button_just_pressed $Button1
+then
+    jump @REMOVE
+end
+
+0FE8: $CheckboxValue = menu_vsl_get_int_value item $Checkbox1
+
+0FE9: $X = menu_vsl_get_float_value item $FloatRange1
+
+if $CheckboxValue == 1
+then
+    00A1: put_actor $PLAYER_ACTOR at $X $Y $Z
+else
+    00A1: put_actor $PLAYER_ACTOR at $X $Y 100.0
+end
+
+jump @LOOP
+
+:REMOVE
+
+0FE5: menu_vsl_remove_window $Window1
+0FEB: menu_vsl_set_debug_visible 0
+
+004E: terminate_this_script
