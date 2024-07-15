@@ -1,3 +1,4 @@
 obj/
 libs/
-MenuVSL/*.cpp
+main.cpp
+MenuVSL.cpp

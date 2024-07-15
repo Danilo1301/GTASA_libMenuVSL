@@ -1,6 +1,6 @@
 #pragma once
 
-#include "menu/MenuStructs.h"
+#include "menu/SimpleGTA.h"
 
 class Input {
 public:

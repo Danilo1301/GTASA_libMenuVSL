@@ -32,8 +32,20 @@ public:
 
     Item(eItemType type);
     
+	/*1.0.0*/
+
+	/*1.2.0*/
+	void AddColorIndicator(CRGBA* color);
+	void AddOption(int value, std::string name);
+	void SetCurrentOption(int value);
+	Option GetCurrentOption();
+	bool GetCheckboxValue();
+
+	//
+
     void Update();
     void Draw();
+    void DrawColorIndicatos();
 
     void OnPress();
 };

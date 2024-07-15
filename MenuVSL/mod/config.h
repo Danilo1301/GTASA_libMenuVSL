@@ -47,7 +47,7 @@ public:
 
     // Self-explained
     inline bool  IsValueChanged() { return m_bValueChanged; }
-    inline void  ClearLast();
+    inline void  ClearLast() { if(pLastEntry) { delete pLastEntry; pLastEntry = NULL; } }
     
     static Config* GetConfig();
     static ConfigEntry* pLastEntry;
@@ -82,57 +82,10 @@ public:
     inline void Reset() { SetString(m_szDefaultValue); }
     rgba_t ParseColor();
     void SetColor(rgba_t clr, bool asFloat = false);
-
-    inline bool LoadedUndefault() { return m_bNotDefaultValue; }
-    inline int Clamp(int min, int max)
-    {
-        if(m_nIntegerValue < min)
-        {
-            m_pBoundCfg->m_bValueChanged = true;
-            int ret = m_nIntegerValue - min;
-            m_nIntegerValue = min;
-            m_fFloatValue = (float)min;
-            m_szValue[0] = 0;
-            return ret;
-        }
-        if(m_nIntegerValue > max)
-        {
-            m_pBoundCfg->m_bValueChanged = true;
-            int ret = m_nIntegerValue - max;
-            m_nIntegerValue = max;
-            m_fFloatValue = (float)max;
-            m_szValue[0] = 0;
-            return ret;
-        }
-        return 0;
-    }
-    inline float Clamp(float min, float max)
-    {
-        if(m_fFloatValue < min)
-        {
-            m_pBoundCfg->m_bValueChanged = true;
-            float ret = m_fFloatValue - min;
-            m_nIntegerValue = (int)min;
-            m_fFloatValue = min;
-            m_szValue[0] = 0;
-            return ret;
-        }
-        if(m_fFloatValue > max)
-        {
-            m_pBoundCfg->m_bValueChanged = true;
-            float ret = m_fFloatValue - max;
-            m_nIntegerValue = (int)max;
-            m_fFloatValue = max;
-            m_szValue[0] = 0;
-            return ret;
-        }
-        return 0.0f;
-    }
     
 private:
     Config* m_pBoundCfg;
     bool m_bLoadedData;
-    bool m_bNotDefaultValue;
     char m_szMySection[KEY_SECTION_BUFFER_C];
     char m_szMyKey[KEY_SECTION_BUFFER_C];
     float m_fFloatValue;
@@ -146,7 +99,6 @@ private:
 
     friend class Config;
 };
-inline void Config::ClearLast() { if(pLastEntry) { delete pLastEntry; pLastEntry = NULL; } }
 extern Config* cfg;
 
 #endif // _CONFIG
