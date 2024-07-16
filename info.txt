@@ -3,9 +3,8 @@ To release
 
 Check logs
 
-X Check Mod::m_Version
-X Add version to ModConfig::DefineVersions
-
+Check MenuVSL::m_Version
+Add version to ModConfig::DefineVersions
 Check MenuCredits version in MenuVSL.cpp
 Check MYMODCFG version in main.cpp
 
@@ -34,13 +33,14 @@ Initial release
 [1.1.0]
 [X] ADD: render sprites :D
 [X] ADD: pages, and buttons to control pages
-[ ] UPDATE: AML Headers from 1.2.2 to 1.1
 [X] FIX: button left for page is not working
 [X] ADD: AddWindowOptionsString
 [X] ADD: color indicator
 [X] ADD: AddColorWindow
 
 [ ] ADD: select option from a list of options, separated by A-Z
+
+[ ] Updated AML Headers to the same as giroflexVSL 1.1?
 
 --------------------------
 Notes:

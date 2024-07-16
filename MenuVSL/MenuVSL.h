@@ -28,6 +28,8 @@ public:
     static std::map<int, Window*> m_CleoWindows;
     static std::map<int, Item*> m_CleoItems;
 
+    static std::string m_Version;
+
     MenuCredits m_Credits;
     CSprite2d testSprite;
 

@@ -14,8 +14,8 @@ Window::Window()
         window->m_Page -= 1;
 		if (window->m_Page < 0) window->m_Page = 0;
 
-        menuVSL->debug->m_Visible = true;
-        menuVSL->debug->AddLine("<" + std::to_string(window->m_Page) + "/" + std::to_string(window->GetMaxPages()));
+        //menuVSL->debug->m_Visible = true;
+        //menuVSL->debug->AddLine("<" + std::to_string(window->m_Page) + "/" + std::to_string(window->GetMaxPages()));
     };
 
     m_RightButton = AddButton(">", CRGBA(0, 0, 255));
@@ -26,15 +26,15 @@ Window::Window()
 		int maxPages = window->GetMaxPages();
 		if (window->m_Page >= maxPages-1) window->m_Page = maxPages-1;
 
-        menuVSL->debug->m_Visible = true;
-        menuVSL->debug->AddLine(">" + std::to_string(window->m_Page) + "/" + std::to_string(window->GetMaxPages()));
+        //menuVSL->debug->m_Visible = true;
+        //menuVSL->debug->AddLine(">" + std::to_string(window->m_Page) + "/" + std::to_string(window->GetMaxPages()));
     };
 
     m_BackButton = AddButton("Back", CRGBA(0, 0, 255));
     m_BackButton->m_FitInWindow = false;
     m_BackButton->onClick = [window]() {
-        menuVSL->debug->m_Visible = true;
-        menuVSL->debug->AddLine("Back");
+        //menuVSL->debug->m_Visible = true;
+        //menuVSL->debug->AddLine("Back");
 
         window->SetToBeRemoved();
     };
