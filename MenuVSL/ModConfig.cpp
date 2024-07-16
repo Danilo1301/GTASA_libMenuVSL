@@ -258,16 +258,18 @@ std::string ModConfig::ReadVersionFile()
 
 void ModConfig::DefineVersions()
 {
+    if(VersionControl::m_Versions.size() > 0) return;
+
     VersionControl::AddVersion("1.0.0");
     VersionControl::AddVersion("1.1.0");
 
-    VersionControl::SetVersion(ReadVersionFile(), MenuVSL::m_Version);
+    VersionControl::SetVersion(ReadVersionFile(), GetModVersion());
 }
 
 void ModConfig::ProcessVersionChanges_PreConfigLoad()
 {
     std::string prevVersion = ReadVersionFile();
-    std::string currentVersion = MenuVSL::m_Version;
+    std::string currentVersion = GetModVersion();
 
     Log::Level(LOG_LEVEL::LOG_BOTH) << "ModConfig: [PRE] Updating from " << prevVersion << " to " << currentVersion << std::endl;
 
@@ -281,7 +283,7 @@ void ModConfig::ProcessVersionChanges_PreConfigLoad()
 void ModConfig::ProcessVersionChanges_PostConfigLoad()
 {
     std::string prevVersion = ReadVersionFile();
-    std::string currentVersion = MenuVSL::m_Version;
+    std::string currentVersion = GetModVersion();
 
     Log::Level(LOG_LEVEL::LOG_BOTH) << "ModConfig: [POST] Updating from " << prevVersion << " to " << currentVersion << std::endl;
     
@@ -297,4 +299,10 @@ void ModConfig::ProcessVersionChanges_PostConfigLoad()
     file.open(path, std::fstream::out);
     file << currentVersion;
     file.close();
+}
+
+std::string ModConfig::GetModVersion()
+{
+    DefineVersions();
+    return VersionControl::m_Versions[VersionControl::m_Versions.size() - 1]->version;
 }

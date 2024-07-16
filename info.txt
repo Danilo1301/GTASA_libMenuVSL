@@ -37,10 +37,10 @@ Initial release
 [X] ADD: AddWindowOptionsString
 [X] ADD: color indicator
 [X] ADD: AddColorWindow
+[X] Updated AML Headers to the same as giroflexVSL 1.0.3.1?
 
 [ ] ADD: select option from a list of options, separated by A-Z
 
-[ ] Updated AML Headers to the same as giroflexVSL 1.1?
 
 --------------------------
 Notes:

@@ -11,7 +11,7 @@
 #include "sdk/Image.h"
 
 struct MenuCredits {
-	std::string text = "~w~MenuVSL v1.1.0 (by ~y~Danilo1301~w~)";
+	std::string text = "";
 	bool hasShownCredits = false;
 	int time = 0;
 	int timeElapsed = 0;
@@ -27,8 +27,6 @@ public:
 
     static std::map<int, Window*> m_CleoWindows;
     static std::map<int, Item*> m_CleoItems;
-
-    static std::string m_Version;
 
     MenuCredits m_Credits;
     CSprite2d testSprite;

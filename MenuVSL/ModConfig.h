@@ -48,4 +48,5 @@ public:
 	static void DefineVersions();
 	static void ProcessVersionChanges_PreConfigLoad();
 	static void ProcessVersionChanges_PostConfigLoad();
+	static std::string GetModVersion();
 };
