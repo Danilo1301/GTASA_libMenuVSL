@@ -23,10 +23,13 @@ class MenuVSL : public IMenuVSL {
 public:
     static MenuVSL* Instance;
     static std::vector<Window*> m_Windows;
+    static CVector2D m_DefaultFontScale;
     static CVector2D m_FontScale;
 
     static std::map<int, Window*> m_CleoWindows;
     static std::map<int, Item*> m_CleoItems;
+
+    static std::map<std::string, int> globalIntVariables;
 
     MenuCredits m_Credits;
     CSprite2d testSprite;
@@ -36,6 +39,7 @@ public:
     MenuVSL();
 
     /*1.0.0*/
+
     IWindow* AddWindow();
     std::vector<IWindow*> GetWindows();
 
@@ -45,11 +49,24 @@ public:
     void DrawRectWithString(std::string text, CVector2D pos, CVector2D boxSize, CRGBA boxColor, CRGBA textColor, eFontAlignment align);
 
     /*1.1.0*/
+
     void DrawSprite(CSprite2d* sprite, CVector2D pos, CVector2D size);
     void* LoadRwTextureFromFile(std::string file, std::string textureName, bool flipHorizontal = false);
     IWindow* AddWindowOptionsString(std::string title, IWindow* parent, std::string* pString, std::vector<std::string>* options);
     IWindow* AddWindowMultiOptionsString(std::string title, IWindow* parent, std::vector<std::string>* selectedOptions, std::vector<std::string>* allOptions);
     IWindow* AddColorWindow(IWindow* parent, CRGBA* color, std::function<void()> onValueChange);
+
+    /*1.2.0*/
+
+    void SetGlobalIntVariable(std::string key, int value);
+    int GetGlobalIntVariable(std::string key);
+
+    CVector2D ConvertWorldPositionToScreenPosition(CVector worldPosition);
+    void DrawWorldText(std::string text, CVector position, CRGBA color, eFontAlignment align);
+    void AddOnRender(std::function<void()> fn);
+    CVector2D GetFontScale();
+    void SetFontScale(float sx, float sy);
+    void ResetFontScale();
 
     //
 

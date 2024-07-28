@@ -18,3 +18,5 @@ MenuVSL starts at 0FE0
 0FED=2,menu_vsl_add_debug_float %1g% %2d%
 0FEE=4,%4d% = menu_vsl_add_checkbox window %1d% text %2g% value %3d%
 0FEF=5,menu_vsl_set_window_background window %1d% r %2d% g %3d% b %4d% a %5d%
+0FF0=2,set_global_int_variable %1g% value %2d%
+0FF1=2,%2d% = get_global_int_variable %1g%

@@ -7,26 +7,26 @@ void Debug::AddLine(std::string text)
 {
     Log::Level(LOG_LEVEL::LOG_BOTH) << "Debug: " << text << std::endl;
 
-    m_Lines.push_back(text);
+    lines.push_back(text);
 
-    if (m_Lines.size() >= 16) m_Lines.erase(m_Lines.begin());
+    if (lines.size() >= 16) lines.erase(lines.begin());
 }
 
 void Debug::Clear()
 {
-    m_Lines.clear();
+    lines.clear();
 }
 
 void Debug::Draw()
 {
-    if(!m_Visible) return;
+    if(!visible) return;
 
     auto menuVSL = MenuVSL::Instance;
 
     float x = 20;
     float y = 260;
 
-    for(auto line : m_Lines)
+    for(auto line : lines)
     {
        menuVSL->DrawString(line, CVector2D(x, y), CRGBA(255, 255, 0), eFontAlignment::ALIGN_LEFT);
 

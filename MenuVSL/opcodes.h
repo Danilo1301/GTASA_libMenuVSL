@@ -46,6 +46,9 @@ __decl_op(MENU_VSL_ADD_DEBUG_INT, 0x0FEC); // 0FEC=2,menu_vsl_add_debug_int %1g%
 __decl_op(MENU_VSL_ADD_DEBUG_FLOAT, 0x0FED); // 0FED=2,menu_vsl_add_debug_float %1g% %2d%
 __decl_op(MENU_VSL_ADD_CHECKBOX, 0x0FEE); // 0FEE=4,%4d% = menu_vsl_add_checkbox window %1d% text %2g% value %3d%
 __decl_op(MENU_VSL_SET_WINDOW_BACKGROUND, 0x0FEF); // 0FEF=5,menu_vsl_set_window_background window %1d% r %2d% g %3d% b %4d% a %5d%
+__decl_op(SET_GLOBAL_INT_VARIABLE, 0x0FF0); // 0FF0=2,set_global_int_variable %1g% value %2d%
+__decl_op(GET_GLOBAL_INT_VARIABLE, 0x0FF1); // 0FF1=2,%2d% = get_global_int_variable %1g%
+
 
 bool bool1 = true;
 int int1 = 5;
@@ -359,7 +362,7 @@ static void MENU_VSL_SET_DEBUG_VISIBLE(__handler_params)
 
     Log::Level(LOG_LEVEL::LOG_BOTH) << "value: " << value << std::endl;
 
-    MenuVSL::Instance->debug->m_Visible = value;
+    MenuVSL::Instance->debug->visible = value;
 }
 
 static void MENU_VSL_ADD_DEBUG_INT(__handler_params)
@@ -448,4 +451,42 @@ static void MENU_VSL_SET_WINDOW_BACKGROUND(__handler_params)
 
     auto window = MenuVSL::m_CleoWindows[windowHandle];
     window->m_TitleBackgroundColor = CRGBA(r, g, b, a);
+}
+
+static void SET_GLOBAL_INT_VARIABLE(__handler_params)
+{
+    Log::Level(LOG_LEVEL::LOG_BOTH) << "SET_GLOBAL_INT_VARIABLE" << std::endl;
+
+    char param1[256];
+    cleo->ReadStringLong(handle, param1, sizeof(param1));
+    param1[sizeof(param1)-1] = 0; // I can't trust game scripting engine...
+    int i = 0;
+    while(param1[i] != 0) // A little hack
+    {
+        if(param1[i] == '\\') param1[i] = '/';
+        ++i;
+    }
+
+    int value = __readParam(handle)->i;
+
+    MenuVSL::Instance->SetGlobalIntVariable(param1, value);
+}
+
+static void GET_GLOBAL_INT_VARIABLE(__handler_params)
+{
+    Log::Level(LOG_LEVEL::LOG_BOTH) << "SET_GLOBAL_INT_VARIABLE" << std::endl;
+
+    char param1[256];
+    cleo->ReadStringLong(handle, param1, sizeof(param1));
+    param1[sizeof(param1)-1] = 0; // I can't trust game scripting engine...
+    int i = 0;
+    while(param1[i] != 0) // A little hack
+    {
+        if(param1[i] == '\\') param1[i] = '/';
+        ++i;
+    }
+
+    auto result = __getPointerToScriptVar(handle);
+
+    result->i = MenuVSL::Instance->GetGlobalIntVariable(param1);
 }

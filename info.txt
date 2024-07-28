@@ -3,14 +3,9 @@ To release
 
 Check logs
 
-Check MenuVSL::m_Version
 Add version to ModConfig::DefineVersions
-Check MenuCredits version in MenuVSL.cpp
 Check MYMODCFG version in main.cpp
 
-Set Mod::m_DevModeEnabled to false
-Check EN and PT .fxt
-Check .fxt mod version (EN and PT)
 Check game more than once to make sure
 Check if config is saving
 
@@ -38,6 +33,11 @@ Initial release
 [X] ADD: color indicator
 [X] ADD: AddColorWindow
 [X] Updated AML Headers to the same as giroflexVSL 1.0.3.1?
+
+[1.2.0]
+[X] ADD: GLOBAL_INT_VARIABLE and cleo opcodes
+[X] ADD: DrawWorldText, AddOnRender, SetFontScale
+
 
 [ ] ADD: select option from a list of options, separated by A-Z
 
