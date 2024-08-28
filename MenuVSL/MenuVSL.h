@@ -31,6 +31,8 @@ public:
 
     static std::map<std::string, int> globalIntVariables;
 
+    static bool m_FirstUpdated;
+
     MenuCredits m_Credits;
     CSprite2d testSprite;
 
@@ -68,10 +70,22 @@ public:
     void SetFontScale(float sx, float sy);
     void ResetFontScale();
 
+    /*1.3.0*/
+
+    void AddOnVehicleRenderBefore(std::function<void(void*)> fn);
+    void AddOnVehicleRenderAfter(std::function<void(void*)> fn);
+    void AddOnUpdate(std::function<void()> fn);
+    void AddOnProcessScripts(std::function<void()> fn);
+    std::vector<MVehicle> GetVehicles();
+
     //
 
     void Update(int dt);
+    void ProcessScripts();
     void Draw();
+
+    void VehicleRenderBefore(void* pVehicle);
+    void VehicleRenderAfter(void* pVehicle);
     
     void RemoveWindowNow(Window* window);
 

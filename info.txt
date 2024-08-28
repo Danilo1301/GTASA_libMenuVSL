@@ -38,8 +38,11 @@ Initial release
 [X] ADD: GLOBAL_INT_VARIABLE and cleo opcodes
 [X] ADD: DrawWorldText, AddOnRender, SetFontScale
 
+[???]
+[ ] ADD: RenderVehicle
 
 [ ] ADD: select option from a list of options, separated by A-Z
+
 
 
 --------------------------
