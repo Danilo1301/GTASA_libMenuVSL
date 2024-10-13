@@ -204,16 +204,40 @@ void Window::Draw()
         m_BackButton->m_Visible = false;
     }
 
-    float windowHeight = 50;
+    //window
+
+    float windowHeight = 110;
 
     menuVSL->DrawRect(CRect(position.x, position.y, position.x + m_Width, position.y + windowHeight), m_TitleBackgroundColor);
 
+    //change font
+    menuVSL->SetFontScale(1.5f * 2, 2.25f * 2);
+    MenuVSL::m_FontStyle = eFontStyle::FONT_GOTHIC;
+
     float fontHeight = MenuVSL::m_FontScale.y * 10.0f;
-    CVector2D titlePosition = CVector2D(position.x + 10, position.y + windowHeight/2 - fontHeight / 2);
+    CVector2D titlePosition = CVector2D(position.x + m_Width/2, position.y + windowHeight/2 - fontHeight / 2);
     
-    menuVSL->DrawString(m_Title, titlePosition, CRGBA(255, 255, 255), eFontAlignment::ALIGN_LEFT);
+    menuVSL->DrawString(m_Title, titlePosition, CRGBA(255, 255, 255), eFontAlignment::ALIGN_CENTER);
+    
+    //reset font
+    menuVSL->ResetFontScale();
+    MenuVSL::m_FontStyle = MenuVSL::m_DefaultFontStyle;
 
     position.y += windowHeight;
+
+    // sub title
+
+    float subTitleHeight = 40;
+    menuVSL->DrawRect(CRect(position.x, position.y, position.x + m_Width, position.y + subTitleHeight), m_SubTitleBackgroundColor);
+    
+    fontHeight = MenuVSL::m_FontScale.y * 10.0f;
+    CVector2D subTitlePosition = CVector2D(position.x + 5, position.y + subTitleHeight/2 - fontHeight / 2);
+
+    menuVSL->DrawString(m_Title, subTitlePosition, CRGBA(255, 255, 255), eFontAlignment::ALIGN_LEFT);
+
+    position.y += subTitleHeight;
+
+    //
 
     auto items = GetItemsInPage();
 

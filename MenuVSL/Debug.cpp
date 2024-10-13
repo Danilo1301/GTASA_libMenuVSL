@@ -19,7 +19,13 @@ void Debug::Clear()
 
 void Debug::Draw()
 {
-    if(!visible) return;
+    if(!visible)
+    {
+        if(MenuVSL::m_FirstUpdated)
+        {
+            return;
+        }
+    }
 
     auto menuVSL = MenuVSL::Instance;
 

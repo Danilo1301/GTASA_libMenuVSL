@@ -1,6 +1,7 @@
 #include "Input.h"
 
 #include "Log.h"
+#include "MenuVSL.h"
 
 extern CVector2D *m_vecCachedPos;
 extern bool *CTouchInterface_m_bTouchDown;
@@ -38,11 +39,16 @@ void Input::Update()
 
 CVector2D Input::GetTouchPos()
 {
-    //auto orgPos = m_vecCachedPos;
-    //auto gtaScreenSize = GetGTAScreenSize();
-    //auto screenSize = GetScreenSize();
+    auto pos = *m_vecCachedPos;
 
-    return *m_vecCachedPos;
+    /*
+    CVector2D fixedPos = CVector2D(
+        MenuVSL::FixPositionX(pos.x),
+        MenuVSL::FixPositionY(pos.y)
+    );
+    */
+
+    return pos;
 
     /*
     return {
@@ -52,9 +58,26 @@ CVector2D Input::GetTouchPos()
     */
 }
 
-CVector2D Input::GetScreenSize()
+CVector2D Input::GetTouchPosFixed()
+{
+    auto pos = GetTouchPos();
+    
+    CVector2D fixedPos = CVector2D(
+        MenuVSL::FixPositionX(pos.x),
+        MenuVSL::FixPositionY(pos.y)
+    );
+    
+    return fixedPos;
+}
+
+CVector2D Input::GetCellphoneScreenSize()
 {
     return CVector2D(OS_ScreenGetWidth(), OS_ScreenGetHeight());
+}
+
+CVector2D Input::GetGTAScreenSize()
+{
+    return MenuVSL::m_GTAScreenSize;
 }
 
 bool Input::IsTouchPressed()
@@ -64,6 +87,15 @@ bool Input::IsTouchPressed()
 
 bool Input::IsPointInsideRect(CVector2D pos, CVector2D rectPos, CVector2D rectSize)
 {
+    //pos.x = MenuVSL::FixPositionX(pos.x);
+    //pos.y = MenuVSL::FixPositionY(pos.y);
+
+    rectPos.x = MenuVSL::FixPositionX(rectPos.x);
+    rectPos.y = MenuVSL::FixPositionY(rectPos.y);
+
+    rectSize.x = MenuVSL::FixPositionX(rectSize.x);
+    rectSize.y = MenuVSL::FixPositionY(rectSize.y);
+
     if (pos.x >= rectPos.x && pos.x <= rectPos.x + rectSize.x)
     {
         if (pos.y >= rectPos.y && pos.y <= rectPos.y + rectSize.y)

@@ -44,6 +44,18 @@ Initial release
 [ ] ADD: select option from a list of options, separated by A-Z
 
 
+-------------------------
+Screen FIX
+
+var screen = {x: 1024, y: 600}
+var gtaScreen = {x: 820, y: 480}
+
+var pos = {x: 300, y: 300}
+
+var x = screen.x/gtaScreen.x * pos.x
+var y = screen.y/gtaScreen.y * pos.y
+
+console.log(x, y)
 
 --------------------------
 Notes:

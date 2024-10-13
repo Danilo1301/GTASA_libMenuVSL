@@ -4,6 +4,8 @@
 
 //#include "SimpleGTA.h"
 
+#include "utils.h"
+
 #include "Log.h"
 #include "Input.h"
 #include "opcodes.h"
@@ -203,22 +205,18 @@ extern "C" void OnModLoad()
     cfg->Bind("GitHub", "", "About")->SetString("https://github.com/Danilo1301/GTASA_libMenuVSL"); cfg->ClearLast();
     cfg->Save();
 
-    //CLEO
-    Log::Level(LOG_LEVEL::LOG_BOTH) << "Loading CLEO..." << std::endl;
-    cleo = (cleo_ifs_t*)GetInterface("CLEO");
-    if (cleo) Log::Level(LOG_LEVEL::LOG_BOTH) << "CLEO loaded" << std::endl;
-    else Log::Level(LOG_LEVEL::LOG_BOTH) << "CLEO was not loaded" << std::endl;
+    //Interfaces
+
+    LoadInterface(&cleo, "CLEO");
+    Log::Level(LOG_LEVEL::LOG_BOTH) << "CLEO interface 2.0.1.3: (cleo_ifs_t)" << std::endl;
 
     if(!cleo)
     {
+        Log::Level(LOG_LEVEL::LOG_BOTH) << "You don't have the lib CLEO" << std::endl;
         return;
     }
 
-    //SAUtils
-    Log::Level(LOG_LEVEL::LOG_BOTH) << "Loading SAUtils..." << std::endl;
-    sautils = (ISAUtils*)GetInterface("SAUtils");
-    if (sautils) Log::Level(LOG_LEVEL::LOG_BOTH) << "SAUtils loaded" << std::endl;
-    else Log::Level(LOG_LEVEL::LOG_BOTH) << "SAUtils was not loaded" << std::endl;
+    LoadInterface(&sautils, "SAUtils");
 
     if(sautils)
     {
@@ -237,7 +235,7 @@ extern "C" void OnModLoad()
     Log::Level(LOG_LEVEL::LOG_BOTH) << "Finding symbols..." << std::endl;
 
     void* hGTASA = dlopen("libGTASA.so", RTLD_LAZY);
-    uintptr_t gameAddr = (uintptr_t)(cleo->GetMainLibraryLoadAddress());
+    uintptr_t gameAddr = (uintptr_t)cleo->GetMainLibraryLoadAddress();
 
     SET_TO(m_vecCachedPos, aml->GetSym(hGTASA, "_ZN15CTouchInterface14m_vecCachedPosE"));
     SET_TO(CSprite2d_DrawRect, aml->GetSym(hGTASA, "_ZN9CSprite2d8DrawRectERK5CRectRK5CRGBA"));
@@ -292,8 +290,12 @@ extern "C" void OnModLoad()
 
     //HOOK(CHud_Draw, aml->GetSym(hGTASA, "_ZN4CHud4DrawEv"));
 
+    MenuVSL::m_ScreenSize.x = OS_ScreenGetWidth();
+    MenuVSL::m_ScreenSize.y = OS_ScreenGetHeight();
     Log::Level(LOG_LEVEL::LOG_BOTH) << "Screen width: " << OS_ScreenGetWidth() << std::endl;
     Log::Level(LOG_LEVEL::LOG_BOTH) << "Screen height: " << OS_ScreenGetHeight() << std::endl;
+    Log::Level(LOG_LEVEL::LOG_BOTH) << "GTA Screen width: " << Input::GetGTAScreenSize().x << std::endl;
+    Log::Level(LOG_LEVEL::LOG_BOTH) << "GTA Screen height: " << Input::GetGTAScreenSize().y << std::endl;
 
     Log::Level(LOG_LEVEL::LOG_BOTH) << "Registering opcodes..." << std::endl;
 

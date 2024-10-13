@@ -102,16 +102,16 @@ public:
 class CRect {
 public:
     float left = 0;          // x1
-    float bottom = 0;        // y1
+    float top = 0;        // y1
     float right = 0;         // x2
-    float top = 0;           // y2
+    float bottom = 0;           // y2
 
-    CRect(float left, float bottom, float right, float top)
+    CRect(float left, float top, float right, float bottom)
     {
         this->left = left;
-        this->bottom = bottom;
-        this->right = right;
         this->top = top;
+        this->right = right;
+        this->bottom = bottom;
     }
 };
 

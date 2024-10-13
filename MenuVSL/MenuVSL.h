@@ -4,6 +4,7 @@
 
 #include "Window.h"
 #include "Item.h"
+#include "Popup.h"
 
 #include <map>
 #include <string>
@@ -13,18 +14,19 @@
 struct MenuCredits {
 	std::string text = "";
 	bool hasShownCredits = false;
-	int time = 0;
-	int timeElapsed = 0;
-	int fadeTime = 1000;
-	int height = 80;
 };
 
 class MenuVSL : public IMenuVSL {
 public:
     static MenuVSL* Instance;
     static std::vector<Window*> m_Windows;
+    static std::vector<Popup*> m_Popups;
     static CVector2D m_DefaultFontScale;
     static CVector2D m_FontScale;
+    static eFontStyle m_DefaultFontStyle;
+    static eFontStyle m_FontStyle;
+    static CVector2D m_GTAScreenSize;
+    static CVector2D m_ScreenSize;
 
     static std::map<int, Window*> m_CleoWindows;
     static std::map<int, Item*> m_CleoItems;
@@ -32,6 +34,7 @@ public:
     static std::map<std::string, int> globalIntVariables;
 
     static bool m_FirstUpdated;
+    static bool m_DrawWithFixedScale;
 
     MenuCredits m_Credits;
     CSprite2d testSprite;
@@ -78,6 +81,11 @@ public:
     void AddOnProcessScripts(std::function<void()> fn);
     std::vector<MVehicle> GetVehicles();
 
+    void DrawRectWithStringMultiline(std::string text, CVector2D pos, float width, CVector2D padding, CRGBA boxColor, CRGBA textColor, eFontAlignment align);
+    void ShowPopup(std::string title, std::string text, CVector2D pos, int time);
+
+    void SetDrawWithFixedScale(bool enabled);
+
     //
 
     void Update(int dt);
@@ -95,10 +103,14 @@ public:
     static float GetFontHeight();
 
     void ShowCredits(int time);
+    void RemovePopup(Popup* popup);
 
     static bool CreateImageFromFile(std::string const& path, Image*& img);
 
     void CreateTestMenu();
+
+    static float FixPositionX(float x);
+    static float FixPositionY(float y);
 };
 
 extern IMenuVSL* menuVSL;

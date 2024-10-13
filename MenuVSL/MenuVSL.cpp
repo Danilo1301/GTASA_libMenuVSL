@@ -48,8 +48,13 @@ extern RwTexture* (*RwTextureRead)(const RwChar* name, const RwChar* maskname);
 
 MenuVSL* MenuVSL::Instance = new MenuVSL();
 std::vector<Window*> MenuVSL::m_Windows;
-CVector2D MenuVSL::m_DefaultFontScale = CVector2D(1.5f, 2.25f); //deafult: (1, 1.5)
+std::vector<Popup*> MenuVSL::m_Popups;
+CVector2D MenuVSL::m_DefaultFontScale = CVector2D(1.5f, 2.25f); //deafult: (1.5, 2.25)
 CVector2D MenuVSL::m_FontScale = m_DefaultFontScale;
+eFontStyle MenuVSL::m_DefaultFontStyle = eFontStyle::FONT_SUBTITLES;
+eFontStyle MenuVSL::m_FontStyle = m_DefaultFontStyle;
+CVector2D MenuVSL::m_GTAScreenSize = CVector2D(1280, 600);
+CVector2D MenuVSL::m_ScreenSize = CVector2D(0, 0);
 
 std::map<int, Window*> MenuVSL::m_CleoWindows;
 std::map<int, Item*> MenuVSL::m_CleoItems;
@@ -57,6 +62,7 @@ std::map<int, Item*> MenuVSL::m_CleoItems;
 std::map<std::string, int> MenuVSL::globalIntVariables;
 
 bool MenuVSL::m_FirstUpdated = false;
+bool MenuVSL::m_DrawWithFixedScale = false;
 
 std::vector<std::function<void()>> OnUpdateFunctions;
 std::vector<std::function<void()>> OnProcessScriptsFunctions;
@@ -153,6 +159,14 @@ std::vector<IWindow*> MenuVSL::GetWindows()
 
 void MenuVSL::DrawRect(CRect rect, CRGBA color)
 {
+    if(m_DrawWithFixedScale)
+    {
+        rect.top = FixPositionY(rect.top);
+        rect.left = FixPositionX(rect.left);
+        rect.bottom = FixPositionY(rect.bottom);
+        rect.right = FixPositionX(rect.right);
+    }
+
     CSprite2d_DrawRect(rect, color);
 }
 
@@ -164,6 +178,17 @@ void MenuVSL::DrawRect(CVector2D position, CVector2D size, CRGBA color)
 
 void MenuVSL::DrawString(std::string text, CVector2D position, CRGBA color, eFontAlignment align)
 {
+    CVector2D scale = m_FontScale;
+
+    if(m_DrawWithFixedScale)
+    {
+        position.x = FixPositionX(position.x);
+        position.y = FixPositionY(position.y);
+
+        scale.x = FixPositionX(scale.x);
+        scale.y = FixPositionY(scale.y);
+    }
+
     sprintf(buffer, "%s", text.c_str());
     AsciiToGxtChar(buffer, textGxt);
     
@@ -185,8 +210,8 @@ void MenuVSL::DrawString(std::string text, CVector2D position, CRGBA color, eFon
     //CFont::SetRightJustifyWrap(false);
     //CFont::SetJustify(false);
     //CFont::SetBackground(false, false);
-    CFont_SetScale(m_FontScale.x, m_FontScale.y);
-    CFont_SetFontStyle(eFontStyle::FONT_SUBTITLES);
+    CFont_SetScale(scale.x, scale.y);
+    CFont_SetFontStyle(m_FontStyle);
     CFont_SetProportional(true);
     CFont_SetColor(color);
     CFont_PrintString(position.x, position.y, textGxt);
@@ -218,6 +243,12 @@ void MenuVSL::DrawRectWithString(std::string text, CVector2D pos, CVector2D boxS
 
 void MenuVSL::DrawSprite(CSprite2d* sprite, CVector2D pos, CVector2D size)
 {   
+    if(m_DrawWithFixedScale)
+    {
+        pos.x = FixPositionX(pos.x);
+        pos.y = FixPositionY(pos.y);
+    }
+
     CSprite2d_DrawSprite(
         sprite,
         CRect(
@@ -282,13 +313,18 @@ void MenuVSL::Update(int dt)
         Log::Level(LOG_LEVEL::LOG_BOTH) << "MenuVSL: Removed " << windowsToRemove.size() << " windows" << std::endl;
     }
 
-    //credits
-    if(m_Credits.time > 0) {
-        m_Credits.timeElapsed += dt;
-        if(m_Credits.timeElapsed >= m_Credits.time)
+    //popups
+    for(int i = 0; i < m_Popups.size(); i++)
+    {
+        auto popup = m_Popups[i];
+        if(i == 0) popup->Update(dt);
+    }
+
+    if(m_Popups.size() > 0)
+    {
+        if(m_Popups[0]->HasCompleted())
         {
-            m_Credits.timeElapsed = 0;
-            m_Credits.time = 0;
+            RemovePopup(m_Popups[0]);
         }
     }
 
@@ -302,7 +338,20 @@ void MenuVSL::ProcessScripts()
 
 void MenuVSL::Draw()
 {
+    m_DrawWithFixedScale = true; // FIX SCALE
+
     //Log::Level(LOG_LEVEL::LOG_UPDATE) << "Draw" << std::endl;
+
+    if(true)
+    {
+        m_DrawWithFixedScale = false;
+        DrawRect(Input::GetTouchPos(), CVector2D(5, 5), CRGBA(255, 0, 0));
+        DrawRect(Input::GetTouchPosFixed(), CVector2D(5, 5), CRGBA(0, 255, 0));
+        m_DrawWithFixedScale = true;
+        
+        //MenuVSL::m_DrawWithFixedScale = true;
+        //DrawRect(rect2, CRGBA(0, 255, 0));
+    }
 
     for(auto window : MenuVSL::m_Windows)
     {
@@ -318,6 +367,18 @@ void MenuVSL::Draw()
     {
         sprintf(buffer, "POS: %.2f, %.2f | dt: %d", m_vecCachedPos->x, m_vecCachedPos->y, deltaTime);
         DrawString(buffer, CVector2D(0, 0), CRGBA(0, 255, 0), eFontAlignment::ALIGN_LEFT);
+    }
+
+    if(false)
+    {
+        CRGBA textColor = { 255, 255, 255, 255 };
+        CRGBA boxColor = CRGBA(0, 0, 0, 100);
+
+        DrawRectWithStringMultiline("Line 1", CVector2D(300, 200), 100, CVector2D(10, 10), boxColor, textColor, eFontAlignment::ALIGN_LEFT);
+        DrawRectWithStringMultiline("Line 1", CVector2D(300, 300), 100, CVector2D(10, 10), boxColor, textColor, eFontAlignment::ALIGN_CENTER);
+        
+        DrawRectWithStringMultiline("Line 1~n~Multi line uau", CVector2D(500, 200), 100, CVector2D(10, 10), boxColor, textColor, eFontAlignment::ALIGN_LEFT);
+        DrawRectWithStringMultiline("Line 1~n~Multi line uau", CVector2D(500, 300), 100, CVector2D(10, 10), boxColor, textColor, eFontAlignment::ALIGN_CENTER);
     }
 
     if(drawCursor)
@@ -348,38 +409,6 @@ void MenuVSL::Draw()
 
     ((Debug*)debug)->Draw();
 
-    //credits
-    if (m_Credits.time > 0)
-    {
-        auto screenSize = Input::GetScreenSize();
-
-        float boxW = 400;
-        float hoxH = 50;
-
-        float x = screenSize.x / 2 - boxW / 2;
-        float y = screenSize.y - 100;
-
-        unsigned char alpha = 255;
-
-        if(m_Credits.timeElapsed >= 0 && m_Credits.timeElapsed < m_Credits.fadeTime)
-        {
-            float in = ((float)m_Credits.fadeTime - (float)m_Credits.timeElapsed) / (float)m_Credits.fadeTime;
-            alpha = 255 - ucharIntensity(255, in);
-        }
-        if(m_Credits.timeElapsed >= m_Credits.time - m_Credits.fadeTime && m_Credits.timeElapsed <= m_Credits.time)
-        {
-            float out = ((float)m_Credits.time - (float)m_Credits.timeElapsed) / (float)m_Credits.fadeTime;
-            alpha = ucharIntensity(255, out);
-        }
-
-        CRGBA textColor = { 255, 255, 255, alpha };
-        //auto boxColor = GetStyle()->COLOR_BACKGROUND;
-        CRGBA boxColor = CRGBA(0, 0, 0, 100);
-        boxColor.a = alpha;
-
-        DrawRectWithString(m_Credits.text, { x, y }, { boxW, hoxH }, boxColor, textColor, eFontAlignment::ALIGN_CENTER);
-    }
-
     bool drawStupidBaiacuSprite = false;
 
     if(drawStupidBaiacuSprite)
@@ -408,6 +437,18 @@ void MenuVSL::Draw()
 
         DrawSprite(&testSprite, CVector2D(0, 0), CVector2D(200, 200));
     }
+
+    m_DrawWithFixedScale = false;
+
+    //popups
+    for(int i = 0; i < m_Popups.size(); i++)
+    {
+        auto popup = m_Popups[i];
+
+        if(i == 0) popup->Draw();
+    }
+
+    m_DrawWithFixedScale = true;
 
     for(auto fn : OnRenderFunctions) fn();
 }
@@ -493,9 +534,20 @@ float MenuVSL::GetFontHeight()
 
 void MenuVSL::ShowCredits(int time)
 {
-    m_Credits.time = time;
-    m_Credits.timeElapsed = 0;
     m_Credits.hasShownCredits = true;
+
+    auto screenSize = Input::GetCellphoneScreenSize();
+
+    auto popupWidth = 400.0f;
+
+    ShowPopup("Menu", m_Credits.text, CVector2D(screenSize.x/2 - popupWidth/2, screenSize.y - 200), time);
+}
+
+void MenuVSL::RemovePopup(Popup* popup)
+{
+    auto it = std::find(m_Popups.begin(), m_Popups.end(), popup);
+    m_Popups.erase(it);
+    delete popup;
 }
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -782,6 +834,9 @@ CVector2D MenuVSL::ConvertWorldPositionToScreenPosition(CVector worldPosition)
 
 	CSprite_CalcScreenCoors(rwp, &screenCoors, &w, &h, true, true);
 
+    screenCoors.x = FixPositionX(screenCoors.x);    
+    screenCoors.y = FixPositionY(screenCoors.y);
+
     return CVector2D(screenCoors.x, screenCoors.y);
 }
 
@@ -830,6 +885,53 @@ std::vector<MVehicle> MenuVSL::GetVehicles()
         mvehicles.push_back(mv);
     }
     return mvehicles;
+}
+
+void MenuVSL::DrawRectWithStringMultiline(std::string text, CVector2D pos, float width, CVector2D padding, CRGBA boxColor, CRGBA textColor, eFontAlignment align)
+{
+    int extraLines = countSubstrOccurrences(text, "~n~");
+
+    float lineSizeY = MenuVSL::GetFontHeight();
+
+    CVector2D boxSize = CVector2D(width, lineSizeY);
+    boxSize.y += padding.y * 2;
+    boxSize.y += extraLines * lineSizeY;
+
+	DrawRect(pos, boxSize, boxColor);
+
+	CVector2D textPos = pos;
+    textPos.y += padding.y;
+
+	if (align == eFontAlignment::ALIGN_CENTER)
+	{
+		textPos.x += boxSize.x / 2;
+	} else if (align == eFontAlignment::ALIGN_RIGHT)
+	{
+		textPos.x += boxSize.x;
+        textPos.x -= padding.x;
+	} else {
+        textPos.x += padding.x;
+    }
+
+	DrawString(text, textPos, textColor, align);
+}
+
+void MenuVSL::ShowPopup(std::string title, std::string text, CVector2D pos, int time)
+{
+    Log::Level(LOG_LEVEL::LOG_BOTH) << "ShowPopup" << std::endl;
+
+    Popup* popup = new Popup();
+    popup->m_Title = title;
+    popup->m_Text = text;
+    popup->m_Position = pos;
+    popup->m_Time = time;
+
+    m_Popups.push_back(popup);
+}
+
+void MenuVSL::SetDrawWithFixedScale(bool enabled)
+{
+    m_DrawWithFixedScale = enabled;
 }
 
 CVector2D MenuVSL::GetFontScale()
@@ -918,6 +1020,16 @@ void MenuVSL::CreateTestMenu()
     close->onClick = [window]() {
         window->SetToBeRemoved();
     };
+}
+
+float MenuVSL::FixPositionX(float x)
+{
+    return MenuVSL::m_ScreenSize.x / MenuVSL::m_GTAScreenSize.x * x;
+}
+
+float MenuVSL::FixPositionY(float y)
+{
+    return MenuVSL::m_ScreenSize.y / MenuVSL::m_GTAScreenSize.y * y;
 }
 
 IMenuVSL* menuVSL = MenuVSL::Instance;
