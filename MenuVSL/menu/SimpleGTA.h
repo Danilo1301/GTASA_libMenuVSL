@@ -45,6 +45,15 @@ public:
         y = a * y;
         z = a * z;
     }
+
+    CVector operator+(const CVector right)
+    {
+        CVector result(this->x, this->y, this->z);
+        result.x += right.x;
+        result.y += right.y;
+        result.z += right.z;
+        return result;
+    }
 };
 
 class CVector2D {

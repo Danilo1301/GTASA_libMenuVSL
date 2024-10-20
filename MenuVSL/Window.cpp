@@ -85,6 +85,11 @@ IItem* Window::AddButton(std::string text, CRGBA color)
 	return item;
 }
 
+IItem* Window::AddButton(std::string text)
+{
+	return AddButton(text, CRGBA(255, 255, 255));
+}
+
 IItem* Window::AddCheckbox(std::string text, bool* value)
 {
     Log::Level(LOG_LEVEL::LOG_BOTH) << "Window: AddCheckbox " << text << std::endl;

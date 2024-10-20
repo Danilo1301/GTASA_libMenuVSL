@@ -21,6 +21,7 @@ public:
     void SetPosition(CVector2D position);
     IItem* AddText(std::string text, CRGBA color);
     IItem* AddButton(std::string text, CRGBA color);
+    IItem* AddButton(std::string text);
     IItem* AddCheckbox(std::string text, bool* value);
     IItem* AddIntRange(std::string text, int* value, int min, int max, int addBy);
     IItem* AddFloatRange(std::string text, float* value, float min, float max, float addBy);

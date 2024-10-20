@@ -86,9 +86,13 @@ public:
 
     void SetDrawWithFixedScale(bool enabled);
 
+    IWindow* AddVector2Window(IWindow* parent, CVector2D* vec, float min, float max, float addBy);
+    IWindow* AddVectorWindow(IWindow* parent, CVector* vec, float min, float max, float addBy);
+
     //
 
     void Update(int dt);
+    void OnFirstUpdate();
     void ProcessScripts();
     void Draw();
 

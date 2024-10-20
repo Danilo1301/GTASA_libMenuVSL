@@ -44,6 +44,8 @@ Initial release
 [ ] ADD: select option from a list of options, separated by A-Z
 
 
+adicionar um options->SetCurrentOptionByIndex()
+
 -------------------------
 Screen FIX
 

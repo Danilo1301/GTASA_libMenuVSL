@@ -53,7 +53,7 @@ CVector2D MenuVSL::m_DefaultFontScale = CVector2D(1.5f, 2.25f); //deafult: (1.5,
 CVector2D MenuVSL::m_FontScale = m_DefaultFontScale;
 eFontStyle MenuVSL::m_DefaultFontStyle = eFontStyle::FONT_SUBTITLES;
 eFontStyle MenuVSL::m_FontStyle = m_DefaultFontStyle;
-CVector2D MenuVSL::m_GTAScreenSize = CVector2D(1280, 600);
+CVector2D MenuVSL::m_GTAScreenSize = CVector2D(1080, 600);
 CVector2D MenuVSL::m_ScreenSize = CVector2D(0, 0);
 
 std::map<int, Window*> MenuVSL::m_CleoWindows;
@@ -145,7 +145,8 @@ IWindow* MenuVSL::AddWindow()
 
     m_ActiveWindow = window;
 
-    ShowCredits(3000);
+    if(!m_Credits.hasShownCredits)
+        ShowCredits(3000);
 
     return window;
 }
@@ -263,7 +264,11 @@ void MenuVSL::DrawSprite(CSprite2d* sprite, CVector2D pos, CVector2D size)
 
 void MenuVSL::Update(int dt)
 {
-    if(!m_FirstUpdated) m_FirstUpdated = true;
+    if(!m_FirstUpdated)
+    {
+        m_FirstUpdated = true;
+        OnFirstUpdate();
+    }
 
     Vehicles::TryFindNewVehicles();
 
@@ -329,6 +334,11 @@ void MenuVSL::Update(int dt)
     }
 
     for(auto fn : OnUpdateFunctions) fn();
+}
+
+void MenuVSL::OnFirstUpdate()
+{
+    CreateTestMenu();
 }
 
 void MenuVSL::ProcessScripts()
@@ -816,6 +826,42 @@ IWindow* MenuVSL::AddColorWindow(IWindow* parent, CRGBA* color, std::function<vo
     return window;
 }
 
+IWindow* MenuVSL::AddVector2Window(IWindow* parent, CVector2D* vec, float min, float max, float addBy)
+{
+    auto window = AddWindow();
+    window->m_Parent = parent;
+    window->m_Width = 400.0f;
+    window->m_Position = { 200, 200 };
+    window->m_ShowBackButton = true;
+
+    auto option_x = window->AddFloatRange("X", &vec->x, min, max, addBy);
+    auto option_y = window->AddFloatRange("Y", &vec->y, min, max, addBy);
+
+    option_x->m_HoldToChange = true;
+    option_y->m_HoldToChange = true;
+
+    return window;
+}
+
+IWindow* MenuVSL::AddVectorWindow(IWindow* parent, CVector* vec, float min, float max, float addBy)
+{
+    auto window = AddWindow();
+    window->m_Parent = parent;
+    window->m_Width = 400.0f;
+    window->m_Position = { 200, 200 };
+    window->m_ShowBackButton = true;
+
+    auto option_x = window->AddFloatRange("X", &vec->x, min, max, addBy);
+    auto option_y = window->AddFloatRange("Y", &vec->y, min, max, addBy);
+    auto option_z = window->AddFloatRange("Z", &vec->z, min, max, addBy);
+
+    option_x->m_HoldToChange = true;
+    option_y->m_HoldToChange = true;
+    option_z->m_HoldToChange = true;
+
+    return window;
+}
+
 void MenuVSL::SetGlobalIntVariable(std::string key, int value)
 {
     globalIntVariables[key] = value;
@@ -833,9 +879,9 @@ CVector2D MenuVSL::ConvertWorldPositionToScreenPosition(CVector worldPosition)
 	RwV3d screenCoors; float w, h;
 
 	CSprite_CalcScreenCoors(rwp, &screenCoors, &w, &h, true, true);
-
-    screenCoors.x = FixPositionX(screenCoors.x);    
-    screenCoors.y = FixPositionY(screenCoors.y);
+    
+    //screenCoors.x = FixPositionX(screenCoors.x);    
+    //screenCoors.y = FixPositionY(screenCoors.y);
 
     return CVector2D(screenCoors.x, screenCoors.y);
 }
@@ -955,9 +1001,13 @@ static std::string testStr;
 static CRGBA testColor(255, 0, 0);
 static std::vector<std::string> testAllOptions;
 static std::vector<std::string> testSelectedOptions;
+static CVector2D vec2(1.0f, 2.0f);
+static CVector vec3(1.0f, 2.0f, 3.0f);
 
 void MenuVSL::CreateTestMenu()
 {
+    Log::Level(LOG_LEVEL::LOG_BOTH) << "Creating test menu" << std::endl;
+
     auto menuVSL = this;
 
     testStrVec.clear();
@@ -982,6 +1032,16 @@ void MenuVSL::CreateTestMenu()
     color->AddColorIndicator(&testColor);
     color->onClick = [menuVSL, window]() {
         menuVSL->AddColorWindow(window, &testColor, []() {});
+    };
+
+    auto button_vec2 = window->AddButton("Vector2 XY");
+    button_vec2->onClick = [menuVSL, window]() {
+        menuVSL->AddVector2Window(window, &vec2, -10.0f, 10.0f, 0.1f);
+    };
+
+    auto button_vec3 = window->AddButton("Vector3 XYZ");
+    button_vec3->onClick = [menuVSL, window]() {
+        menuVSL->AddVectorWindow(window, &vec3, -10.0f, 10.0f, 0.1f);
     };
 
     auto selectItem = window->AddButton("Select item", CRGBA(255, 255, 255));

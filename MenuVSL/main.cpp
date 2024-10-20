@@ -186,9 +186,6 @@ extern "C" void OnModPreLoad()
 
     Log::Level(LOG_LEVEL::LOG_BOTH) << "test_value: " << menuVSL->GetGlobalIntVariable("test_value") << std::endl;
     
-    
-    //MenuVSL::Instance->CreateTestMenu();
-    
     Log::Level(LOG_LEVEL::LOG_BOTH) << "size: " << menuVSL->GetWindows().size() << std::endl;
 
     Log::Level(LOG_LEVEL::LOG_BOTH) << "Preload() END" << std::endl;
