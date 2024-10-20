@@ -36,8 +36,13 @@ public:
     static bool m_FirstUpdated;
     static bool m_DrawWithFixedScale;
 
-    MenuCredits m_Credits;
+    static CSprite2d m_WindowTitleSprite;
+    static CSprite2d m_WindowBgSprite;
+    static CSprite2d m_WindowSelectionSprite;
+    
     CSprite2d testSprite;
+
+    MenuCredits m_Credits;
 
     Window* m_ActiveWindow = NULL;
 

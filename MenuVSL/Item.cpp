@@ -204,12 +204,22 @@ void Item::Draw()
 	
 	DrawColorIndicatos();
 
-	if(m_StringAtRight != NULL)
+	if(m_StringPtrAtRight != NULL)
 	{
-		auto stringPosition = position + CVector2D(m_Size.x, m_Size.y/2);
+		auto offset = m_StringAtRightOffset;
+		auto stringPosition = position + CVector2D(m_Size.x, m_Size.y/2) + offset;
 		stringPosition.y -= MenuVSL::GetFontHeight() / 2;
 		
-		menuVSL->DrawString(*m_StringAtRight, stringPosition, CRGBA(255, 255, 255), eFontAlignment::ALIGN_RIGHT);
+		menuVSL->DrawString(*m_StringPtrAtRight, stringPosition, CRGBA(255, 255, 255), eFontAlignment::ALIGN_RIGHT);
+	}
+
+	if(m_StringAtRight.size() > 0)
+	{
+		auto offset = m_StringAtRightOffset;
+		auto stringPosition = position + CVector2D(m_Size.x, m_Size.y/2) + offset;
+		stringPosition.y -= MenuVSL::GetFontHeight() / 2;
+		
+		menuVSL->DrawString(m_StringAtRight, stringPosition, CRGBA(255, 255, 255), eFontAlignment::ALIGN_RIGHT);
 	}
 
 	if (m_Type == eItemType::ITEM_CHECKBOX)

@@ -1,0 +1,10 @@
+{$CLEO .csi}
+
+//Made by Danilo1301
+
+:DEMOTEXT
+03A4: name_thread "TestMenu2VSL"
+
+0FF0: set_global_int_variable "show_test_menuVSL" value 1
+
+004E: terminate_this_script

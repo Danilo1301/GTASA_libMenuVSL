@@ -53,7 +53,7 @@ CVector2D MenuVSL::m_DefaultFontScale = CVector2D(1.5f, 2.25f); //deafult: (1.5,
 CVector2D MenuVSL::m_FontScale = m_DefaultFontScale;
 eFontStyle MenuVSL::m_DefaultFontStyle = eFontStyle::FONT_SUBTITLES;
 eFontStyle MenuVSL::m_FontStyle = m_DefaultFontStyle;
-CVector2D MenuVSL::m_GTAScreenSize = CVector2D(1080, 600);
+CVector2D MenuVSL::m_GTAScreenSize = CVector2D(1080, 580);
 CVector2D MenuVSL::m_ScreenSize = CVector2D(0, 0);
 
 std::map<int, Window*> MenuVSL::m_CleoWindows;
@@ -63,6 +63,10 @@ std::map<std::string, int> MenuVSL::globalIntVariables;
 
 bool MenuVSL::m_FirstUpdated = false;
 bool MenuVSL::m_DrawWithFixedScale = false;
+
+CSprite2d MenuVSL::m_WindowTitleSprite;
+CSprite2d MenuVSL::m_WindowBgSprite;
+CSprite2d MenuVSL::m_WindowSelectionSprite;
 
 std::vector<std::function<void()>> OnUpdateFunctions;
 std::vector<std::function<void()>> OnProcessScriptsFunctions;
@@ -248,6 +252,9 @@ void MenuVSL::DrawSprite(CSprite2d* sprite, CVector2D pos, CVector2D size)
     {
         pos.x = FixPositionX(pos.x);
         pos.y = FixPositionY(pos.y);
+
+        size.x = FixPositionX(size.x);
+        size.y = FixPositionY(size.y);
     }
 
     CSprite2d_DrawSprite(
@@ -268,6 +275,13 @@ void MenuVSL::Update(int dt)
     {
         m_FirstUpdated = true;
         OnFirstUpdate();
+    }
+
+    if(GetGlobalIntVariable("show_test_menuVSL") == 1)
+    {
+        SetGlobalIntVariable("show_test_menuVSL", 0);
+
+        CreateTestMenu();
     }
 
     Vehicles::TryFindNewVehicles();
@@ -338,7 +352,7 @@ void MenuVSL::Update(int dt)
 
 void MenuVSL::OnFirstUpdate()
 {
-    CreateTestMenu();
+    //CreateTestMenu();
 }
 
 void MenuVSL::ProcessScripts()
@@ -352,7 +366,23 @@ void MenuVSL::Draw()
 
     //Log::Level(LOG_LEVEL::LOG_UPDATE) << "Draw" << std::endl;
 
-    if(true)
+    if(!m_WindowTitleSprite.m_pTexture)
+    {
+        char path[512];
+
+        sprintf(path, "%s/menuVSL/assets/menu_title_bg.png", aml->GetConfigPath());
+        m_WindowTitleSprite.m_pTexture = (RwTexture*)LoadRwTextureFromFile(path, "title_bg", true);
+
+        sprintf(path, "%s/menuVSL/assets/menu_bg.png", aml->GetConfigPath());
+        m_WindowBgSprite.m_pTexture = (RwTexture*)LoadRwTextureFromFile(path, "menu_bg", true);
+
+        sprintf(path, "%s/menuVSL/assets/menu_selection_bg.png", aml->GetConfigPath());
+        m_WindowSelectionSprite.m_pTexture = (RwTexture*)LoadRwTextureFromFile(path, "selection_bg", true);
+    }
+
+    bool drawTouch = false;
+
+    if(drawTouch)
     {
         m_DrawWithFixedScale = false;
         DrawRect(Input::GetTouchPos(), CVector2D(5, 5), CRGBA(255, 0, 0));
@@ -1034,6 +1064,12 @@ void MenuVSL::CreateTestMenu()
         menuVSL->AddColorWindow(window, &testColor, []() {});
     };
 
+    auto button_extraText = window->AddButton("Test extra text:");
+    button_extraText->m_StringAtRight = "EXTRA TEXT";
+    button_extraText->onClick = [menuVSL, window]() {
+
+    };
+
     auto button_vec2 = window->AddButton("Vector2 XY");
     button_vec2->onClick = [menuVSL, window]() {
         menuVSL->AddVector2Window(window, &vec2, -10.0f, 10.0f, 0.1f);
@@ -1045,7 +1081,7 @@ void MenuVSL::CreateTestMenu()
     };
 
     auto selectItem = window->AddButton("Select item", CRGBA(255, 255, 255));
-    selectItem->m_StringAtRight = &testStr;
+    selectItem->m_StringPtrAtRight = &testStr;
     selectItem->onClick = [menuVSL, window] () {
         auto newWindow = menuVSL->AddWindowOptionsString("Select string", window, &testStr, &testStrVec);
     };
@@ -1071,9 +1107,9 @@ void MenuVSL::CreateTestMenu()
 
     window->AddText("Select the item:", CRGBA(255, 255, 255));
 
-    for(int i = 0; i < 20; i++)
+    for(int i = 0; i < 5; i++)
     {
-        window->AddButton("> ~y~Item " + std::to_string(i), CRGBA(255, 255, 255));
+        window->AddButton("> ~y~Test item " + std::to_string(i), CRGBA(255, 255, 255));
     }
 
     auto close = window->AddButton("~r~Close", CRGBA(255, 255, 255));

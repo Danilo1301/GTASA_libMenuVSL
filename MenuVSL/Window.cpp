@@ -214,6 +214,7 @@ void Window::Draw()
     float windowHeight = 110;
 
     menuVSL->DrawRect(CRect(position.x, position.y, position.x + m_Width, position.y + windowHeight), m_TitleBackgroundColor);
+    menuVSL->DrawSprite(&MenuVSL::m_WindowTitleSprite, CVector2D(position.x, position.y), CVector2D(m_Width, windowHeight));
 
     //change font
     menuVSL->SetFontScale(1.5f * 2, 2.25f * 2);
@@ -252,7 +253,9 @@ void Window::Draw()
         if(item->m_FitInWindow) totalWindowHeight += item->m_Size.y;
     }
 
-    menuVSL->DrawRect(CRect(position.x, position.y, position.x + m_Width, position.y + totalWindowHeight), m_ItemBackgroundColor);
+    //menuVSL->DrawRect(CRect(position.x, position.y, position.x + m_Width, position.y + totalWindowHeight), m_ItemBackgroundColor);
+
+    menuVSL->DrawSprite(&MenuVSL::m_WindowBgSprite, CVector2D(position.x, position.y), CVector2D(m_Width, totalWindowHeight));
 
     for(auto item : items)
     {

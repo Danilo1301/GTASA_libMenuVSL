@@ -35,6 +35,7 @@ public:
 	/*1.0.0*/
 
 	/*1.2.0*/
+
 	void AddColorIndicator(CRGBA* color);
 	void AddOption(int value, std::string name);
 	void SetCurrentOption(int value);
