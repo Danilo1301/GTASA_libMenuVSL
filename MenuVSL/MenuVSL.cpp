@@ -10,6 +10,8 @@
 #include "Input.h"
 #include "ModConfig.h"
 #include "Vehicles.h"
+#include "Localization.h"
+#include "Messages.h"
 
 #include "rw/rwcore.h"
 #include "rw/rpworld.h"
@@ -68,6 +70,9 @@ CSprite2d MenuVSL::m_WindowTitleSprite;
 CSprite2d MenuVSL::m_WindowBgSprite;
 CSprite2d MenuVSL::m_WindowSelectionSprite;
 
+std::vector<ModCredits> MenuVSL::m_ModCredits;
+bool MenuVSL::m_CanShownCredits = false;
+
 std::vector<std::function<void()>> OnUpdateFunctions;
 std::vector<std::function<void()>> OnProcessScriptsFunctions;
 std::vector<std::function<void()>> OnRenderFunctions;
@@ -76,6 +81,8 @@ std::vector<std::function<void(void*)>> OnVehicleRenderAfterFunctions;
 
 char buffer[0xFF]; //char text[24];
 unsigned short* textGxt = new unsigned short[0xFF];
+
+int blockedTimeToClickMenu = 0;
 
 void* LoadRwTextureFromPNG(const char* fn)
 {
@@ -134,8 +141,6 @@ MenuVSL::MenuVSL()
     this->debug = new Debug();
 
     this->testSprite.m_pTexture = NULL;
-
-    this->m_Credits.text = "~w~MenuVSL v" + ModConfig::GetModVersion() + " (by ~y~Danilo1301~w~)";
 }
 
 IWindow* MenuVSL::AddWindow()
@@ -149,8 +154,7 @@ IWindow* MenuVSL::AddWindow()
 
     m_ActiveWindow = window;
 
-    if(!m_Credits.hasShownCredits)
-        ShowCredits(3000);
+    blockedTimeToClickMenu = 500;
 
     return window;
 }
@@ -277,6 +281,11 @@ void MenuVSL::Update(int dt)
         OnFirstUpdate();
     }
 
+    if(blockedTimeToClickMenu > 0)
+    {
+        blockedTimeToClickMenu -= dt;
+    }
+
     if(GetGlobalIntVariable("show_test_menuVSL") == 1)
     {
         SetGlobalIntVariable("show_test_menuVSL", 0);
@@ -296,11 +305,22 @@ void MenuVSL::Update(int dt)
 
         window->Update();
 
+        // check pressed item
+
         for(auto item : window->m_Items)
         {
             auto wItem = (Item*)item;
 
-            if(item->hasPressedThisFrame) pressedItem = item;
+            if(blockedTimeToClickMenu > 0)
+            {
+                item->hasPressedThisFrame = false;
+                continue;
+            }
+
+            if(item->hasPressedThisFrame)
+            {
+                pressedItem = item;
+            }
 
             if(wItem->m_ButtonLeft)
             {
@@ -332,7 +352,25 @@ void MenuVSL::Update(int dt)
         Log::Level(LOG_LEVEL::LOG_BOTH) << "MenuVSL: Removed " << windowsToRemove.size() << " windows" << std::endl;
     }
 
-    //popups
+    // credits
+
+    if(m_CanShownCredits)
+    {
+        for(int i = 0; i < MenuVSL::m_ModCredits.size(); i++)
+        {
+            auto modCredits = &MenuVSL::m_ModCredits[i];
+
+            if(modCredits->hasShownCredits) continue;
+            modCredits->hasShownCredits = true;
+
+            menuVSL->debug->AddLine("[Mod] " + modCredits->text);
+
+            ShowCredits(modCredits->text, 4000);
+        }
+    }
+
+    // popups
+
     for(int i = 0; i < m_Popups.size(); i++)
     {
         auto popup = m_Popups[i];
@@ -347,12 +385,26 @@ void MenuVSL::Update(int dt)
         }
     }
 
+    // messages
+
+    Messages::Update(dt);
+
+    //
+
     for(auto fn : OnUpdateFunctions) fn();
 }
 
 void MenuVSL::OnFirstUpdate()
 {
     //CreateTestMenu();
+
+    if(Localization::CurrentLanguage.size() == 0)
+    {
+        ShowSelectLanguageWindow();
+    }
+
+    m_CanShownCredits = true;
+    AddModCredits("~w~MenuVSL v" + ModConfig::GetModVersion() + " (by ~y~Danilo1301~w~)");
 }
 
 void MenuVSL::ProcessScripts()
@@ -363,6 +415,10 @@ void MenuVSL::ProcessScripts()
 void MenuVSL::Draw()
 {
     m_DrawWithFixedScale = true; // FIX SCALE
+    
+    for(auto fn : OnRenderFunctions) fn();
+
+    m_DrawWithFixedScale = true;
 
     //Log::Level(LOG_LEVEL::LOG_UPDATE) << "Draw" << std::endl;
 
@@ -380,19 +436,6 @@ void MenuVSL::Draw()
         m_WindowSelectionSprite.m_pTexture = (RwTexture*)LoadRwTextureFromFile(path, "selection_bg", true);
     }
 
-    bool drawTouch = false;
-
-    if(drawTouch)
-    {
-        m_DrawWithFixedScale = false;
-        DrawRect(Input::GetTouchPos(), CVector2D(5, 5), CRGBA(255, 0, 0));
-        DrawRect(Input::GetTouchPosFixed(), CVector2D(5, 5), CRGBA(0, 255, 0));
-        m_DrawWithFixedScale = true;
-        
-        //MenuVSL::m_DrawWithFixedScale = true;
-        //DrawRect(rect2, CRGBA(0, 255, 0));
-    }
-
     for(auto window : MenuVSL::m_Windows)
     {
         if(!window->GetIsActive()) continue;
@@ -401,30 +444,27 @@ void MenuVSL::Draw()
     }
 
     bool drawPosInfo = debug->visible;
-    bool drawCursor = false;
+    bool drawCursor = debug->visible;
+
+    CRGBA red = CRGBA(255, 0, 0);
+    CRGBA green = CRGBA(0, 255, 0);
 
     if(drawPosInfo)
     {
-        sprintf(buffer, "POS: %.2f, %.2f | dt: %d", m_vecCachedPos->x, m_vecCachedPos->y, deltaTime);
-        DrawString(buffer, CVector2D(0, 0), CRGBA(0, 255, 0), eFontAlignment::ALIGN_LEFT);
-    }
+        auto pos = Input::GetTouchPos();
 
-    if(false)
-    {
-        CRGBA textColor = { 255, 255, 255, 255 };
-        CRGBA boxColor = CRGBA(0, 0, 0, 100);
+        sprintf(buffer, "TOUCH POS: %.2f, %.2f | dt: %d", pos.x, pos.y, deltaTime);
+        DrawString(buffer, CVector2D(30, 30), red, eFontAlignment::ALIGN_LEFT);
 
-        DrawRectWithStringMultiline("Line 1", CVector2D(300, 200), 100, CVector2D(10, 10), boxColor, textColor, eFontAlignment::ALIGN_LEFT);
-        DrawRectWithStringMultiline("Line 1", CVector2D(300, 300), 100, CVector2D(10, 10), boxColor, textColor, eFontAlignment::ALIGN_CENTER);
-        
-        DrawRectWithStringMultiline("Line 1~n~Multi line uau", CVector2D(500, 200), 100, CVector2D(10, 10), boxColor, textColor, eFontAlignment::ALIGN_LEFT);
-        DrawRectWithStringMultiline("Line 1~n~Multi line uau", CVector2D(500, 300), 100, CVector2D(10, 10), boxColor, textColor, eFontAlignment::ALIGN_CENTER);
+        pos = Input::GetTouchPosFixed();
+
+        sprintf(buffer, "FIXED POS: %.2f, %.2f", pos.x, pos.y);
+        DrawString(buffer, CVector2D(30, 60), green, eFontAlignment::ALIGN_LEFT);
     }
 
     if(drawCursor)
     {
-        CRGBA red = CRGBA(255, 0, 0);
-        CRGBA green = CRGBA(0, 255, 0);
+        
 
         bool anyDown = false;
         if(*CTouchInterface_m_bTouchDown) anyDown = true;
@@ -443,8 +483,25 @@ void MenuVSL::Draw()
             }
         }
         */
+
+        m_DrawWithFixedScale = false;
+        DrawRect(Input::GetTouchPos(), CVector2D(5, 5), CRGBA(255, 0, 0));
+        DrawRect(Input::GetTouchPosFixed(), CVector2D(5, 5), CRGBA(0, 255, 0));
+        m_DrawWithFixedScale = true;
         
-        CSprite2d_DrawRect(CRect(m_vecCachedPos->x, m_vecCachedPos->y, m_vecCachedPos->x+20, m_vecCachedPos->y+20), anyDown ? green : red);
+        //CSprite2d_DrawRect(CRect(m_vecCachedPos->x, m_vecCachedPos->y, m_vecCachedPos->x+20, m_vecCachedPos->y+20), anyDown ? green : red);
+    }
+
+    if(false)
+    {
+        CRGBA textColor = { 255, 255, 255, 255 };
+        CRGBA boxColor = CRGBA(0, 0, 0, 100);
+
+        DrawRectWithStringMultiline("Line 1", CVector2D(300, 200), 100, CVector2D(10, 10), boxColor, textColor, eFontAlignment::ALIGN_LEFT);
+        DrawRectWithStringMultiline("Line 1", CVector2D(300, 300), 100, CVector2D(10, 10), boxColor, textColor, eFontAlignment::ALIGN_CENTER);
+        
+        DrawRectWithStringMultiline("Line 1~n~Multi line uau", CVector2D(500, 200), 100, CVector2D(10, 10), boxColor, textColor, eFontAlignment::ALIGN_LEFT);
+        DrawRectWithStringMultiline("Line 1~n~Multi line uau", CVector2D(500, 300), 100, CVector2D(10, 10), boxColor, textColor, eFontAlignment::ALIGN_CENTER);
     }
 
     ((Debug*)debug)->Draw();
@@ -480,7 +537,8 @@ void MenuVSL::Draw()
 
     m_DrawWithFixedScale = false;
 
-    //popups
+    // popups
+
     for(int i = 0; i < m_Popups.size(); i++)
     {
         auto popup = m_Popups[i];
@@ -488,9 +546,13 @@ void MenuVSL::Draw()
         if(i == 0) popup->Draw();
     }
 
-    m_DrawWithFixedScale = true;
+    // bottom message
 
-    for(auto fn : OnRenderFunctions) fn();
+    Messages::Draw();
+
+    //
+    
+    m_DrawWithFixedScale = true;
 }
 
 void MenuVSL::VehicleRenderBefore(void* pVehicle)
@@ -572,15 +634,13 @@ float MenuVSL::GetFontHeight()
     return m_FontScale.y * 12.0f;
 }
 
-void MenuVSL::ShowCredits(int time)
+void MenuVSL::ShowCredits(std::string text, int time)
 {
-    m_Credits.hasShownCredits = true;
-
     auto screenSize = Input::GetCellphoneScreenSize();
 
     auto popupWidth = 400.0f;
 
-    ShowPopup("Menu", m_Credits.text, CVector2D(screenSize.x/2 - popupWidth/2, screenSize.y - 200), time);
+    ShowPopup("Menu", text, CVector2D(screenSize.x/2 - popupWidth/2, screenSize.y - 200), time);
 }
 
 void MenuVSL::RemovePopup(Popup* popup)
@@ -892,6 +952,91 @@ IWindow* MenuVSL::AddVectorWindow(IWindow* parent, CVector* vec, float min, floa
     return window;
 }
 
+IWindow* MenuVSL::ShowSelectLanguageWindow(IWindow* parent)
+{
+    auto window = AddWindow();
+    window->m_Title = "Language";
+    window->m_Parent = parent;
+    if(parent) window->m_ShowBackButton = true;
+
+    window->AddText("- Select your language:", CRGBA(255, 255, 255));
+
+    for(auto language : Localization::AvailableLanguages)
+    {
+        auto button = window->AddButton("~y~" + language);
+
+        button->onClick = [window, language]() {
+            Localization::CurrentLanguage = language;
+            ModConfig::Save();
+
+            window->SetToBeRemoved();
+        };
+    }
+
+    return window;
+}
+
+void MenuVSL::LoadLanguagesFolder(std::string folder)
+{
+    Log::Level(LOG_LEVEL::LOG_BOTH) << "Loading languages folder " << folder << std::endl;
+    
+    if (!std::filesystem::exists(folder))
+    {
+        Log::Level(LOG_LEVEL::LOG_BOTH) << "Folder doesnt exists" << std::endl;
+        return;
+    }
+    
+    if(!std::filesystem::is_directory(folder))
+    {
+        Log::Level(LOG_LEVEL::LOG_BOTH) << "Is not a directory" << std::endl;
+        return;
+    }
+
+    for(auto& file : std::filesystem::directory_iterator(folder))
+    {
+        if(file.is_directory()) continue;
+
+        std::string filePath = file.path().string();
+        std::string filename = file.path().filename().string();
+
+        std::string extension = ".json";
+
+        std::string language = filename;
+        language.replace(language.size() - extension.size(), extension.size(), "");
+
+        Log::Level(LOG_LEVEL::LOG_BOTH) << "Loading language " << language << std::endl;
+
+        Localization::RegisterLanguage(language, filePath); 
+    }
+}
+
+std::string MenuVSL::GetLanguageLineFormatted(std::string key, ...)
+{
+    va_list args;
+    va_start(args, key);
+
+    // Chama a versão que usa va_list e a linha como formato
+    std::string result = Localization::GetLineFormatted(key, args);
+
+    va_end(args);
+
+    return result;
+}
+
+void MenuVSL::ShowMessage(std::string key, int time)
+{
+    Messages::ShowMessage(key, time);
+}
+
+void MenuVSL::AddModCredits(std::string key)
+{
+    ModCredits menuCredits;
+    menuCredits.text = key;
+    MenuVSL::m_ModCredits.push_back(menuCredits);
+}
+
+//
+
 void MenuVSL::SetGlobalIntVariable(std::string key, int value)
 {
     globalIntVariables[key] = value;
@@ -1056,12 +1201,45 @@ void MenuVSL::CreateTestMenu()
 
     auto window = AddWindow();
 
-    auto color = window->AddButton("Select color", CRGBA(255, 255, 255));
+    auto button_debug = window->AddButton("Toggle Debug");
+    button_debug->onClick = [menuVSL]() {
+        menuVSL->debug->visible = !menuVSL->debug->visible;
+
+        if(menuVSL->debug->visible)
+        {
+            menuVSL->ShowMessage("Debug~n~~g~ON", 3000);
+        } else {
+            menuVSL->ShowMessage("Debug~n~~r~OFF", 3000);
+        }
+    };
+
+    auto button_cleardebug = window->AddButton("Clear Debug");
+    button_cleardebug->onClick = [menuVSL]() {
+        menuVSL->debug->Clear();
+        menuVSL->ShowMessage("Debug cleared", 2000);
+    };
+
+    auto button_language = window->AddButton(Localization::GetLineFormatted("test_line"));
+    button_language->onClick = [menuVSL, window]() {
+        menuVSL->ShowSelectLanguageWindow(window);
+    };
+    
+    auto color = window->AddButton("Select color");
     color->AddColorIndicator(&testColor);
     color->AddColorIndicator(&testColor);
     color->AddColorIndicator(&testColor);
     color->onClick = [menuVSL, window]() {
         menuVSL->AddColorWindow(window, &testColor, []() {});
+    };
+
+    auto button_message1 = window->AddButton("Show message 1");
+    button_message1->onClick = [menuVSL, window]() {
+        Messages::ShowMessage("THis is the~n~bottom message~n~num 1 ok?", 3000);
+    };
+
+    auto button_message2 = window->AddButton("Show message 2");
+    button_message2->onClick = [menuVSL, window]() {
+        Messages::ShowMessage("THis is the~n~bottom ~r~message ~w~num2", 3000);
     };
 
     auto button_extraText = window->AddButton("Test extra text:");
@@ -1080,13 +1258,13 @@ void MenuVSL::CreateTestMenu()
         menuVSL->AddVectorWindow(window, &vec3, -10.0f, 10.0f, 0.1f);
     };
 
-    auto selectItem = window->AddButton("Select item", CRGBA(255, 255, 255));
+    auto selectItem = window->AddButton("Select item");
     selectItem->m_StringPtrAtRight = &testStr;
     selectItem->onClick = [menuVSL, window] () {
         auto newWindow = menuVSL->AddWindowOptionsString("Select string", window, &testStr, &testStrVec);
     };
 
-    auto selectMultipleItem = window->AddButton("Select multiple items", CRGBA(255, 255, 255));
+    auto selectMultipleItem = window->AddButton("Select multiple items");
     selectMultipleItem->onClick = [menuVSL, window] () {
         auto newWindow = menuVSL->AddWindowMultiOptionsString("Select multiple", window, &testSelectedOptions, &testAllOptions);
         newWindow->m_OnCloseWindow = [menuVSL] () {
@@ -1109,10 +1287,10 @@ void MenuVSL::CreateTestMenu()
 
     for(int i = 0; i < 5; i++)
     {
-        window->AddButton("> ~y~Test item " + std::to_string(i), CRGBA(255, 255, 255));
+        window->AddButton("> ~y~Test item " + std::to_string(i));
     }
 
-    auto close = window->AddButton("~r~Close", CRGBA(255, 255, 255));
+    auto close = window->AddButton("~r~Close");
     close->onClick = [window]() {
         window->SetToBeRemoved();
     };

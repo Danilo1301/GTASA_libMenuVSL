@@ -15,6 +15,8 @@
 #include "MenuVSL.h"
 #include "Log.h"
 
+#include "Localization.h"
+
 bool isDirExist(const std::string& path)
 {
     struct stat info;
@@ -196,8 +198,8 @@ void ModConfig::CreateFolder(std::string path)
     mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 }
 
-/*
-void ModConfig::WriteToFile(std::string path, Json::Value value) {
+void ModConfig::WriteToFile(std::string path, Json::Value value)
+{
 	Log::Level(LOG_LEVEL::LOG_BOTH) << "ModConfig: WriteToFile " << path << std::endl;
 
 	Json::StyledWriter writer;
@@ -208,7 +210,8 @@ void ModConfig::WriteToFile(std::string path, Json::Value value) {
 	file.close();
 }
 
-Json::Value ModConfig::ReadFile(std::string path) {
+Json::Value ModConfig::ReadFile(std::string path)
+{
 	Log::Level(LOG_LEVEL::LOG_BOTH) << "ModConfig: ReadFile " << path << std::endl;
 
 	std::ifstream file(path);
@@ -222,13 +225,25 @@ Json::Value ModConfig::ReadFile(std::string path) {
 
 	return value;
 }
-*/
 
 void ModConfig::Save()
 {
     Log::Level(LOG_LEVEL::LOG_BOTH) << "ModConfig: Save" << std::endl;
 
     MakePaths();
+
+    // data.json
+
+    std::string dataFile = GetConfigFolder() + "/data.json";
+
+    Json::Value value = Json::objectValue;
+
+    if(Localization::CurrentLanguage.size() > 0)
+    {
+        value["language"] = Localization::CurrentLanguage;
+    }
+
+    WriteToFile(dataFile, value);
 }
 
 void ModConfig::Load()
@@ -236,6 +251,20 @@ void ModConfig::Load()
     Log::Level(LOG_LEVEL::LOG_BOTH) << "ModConfig: Load" << std::endl;
 
     MakePaths();
+
+    // data.json
+
+    std::string dataFile = GetConfigFolder() + "/data.json";
+
+    if(FileExists(dataFile))
+    {
+        Json::Value value = ReadFile(dataFile);
+
+        if(!value["language"].isNull())
+        {
+            Localization::CurrentLanguage = value["language"].asString();
+        }
+    }
 }
 
 std::string ModConfig::ReadVersionFile()
@@ -265,6 +294,7 @@ void ModConfig::DefineVersions()
     VersionControl::AddVersion("1.2.0");
     VersionControl::AddVersion("1.3.0-preview");
     VersionControl::AddVersion("1.3.0");
+    VersionControl::AddVersion("1.4.0");
 
     VersionControl::SetVersion(ReadVersionFile(), GetModVersion());
 }

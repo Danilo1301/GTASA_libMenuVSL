@@ -37,8 +37,8 @@ public:
 	static std::string GetConfigFolder();
 	static void CreateFolder(std::string path);
 
-	//static void WriteToFile(std::string path, Json::Value value);
-	//static Json::Value ReadFile(std::string path);
+	static void WriteToFile(std::string path, Json::Value value);
+	static Json::Value ReadFile(std::string path);
 	
 	static void Save();
 

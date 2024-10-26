@@ -198,7 +198,12 @@ void Item::Draw()
 	bool isHoveringItem = isPressed;
 	if(!m_CanBeSelected) isHoveringItem = false;
 
-    if(isHoveringItem) menuVSL->DrawRect(CRect(position.x, position.y, position.x + size.x, position.y + size.y), CRGBA(255, 255, 255, 255));
+    if(isHoveringItem)
+	{
+		menuVSL->DrawRect(CRect(position.x, position.y, position.x + size.x, position.y + size.y), CRGBA(255, 255, 255, 255));
+	} else {
+		menuVSL->DrawRect(CRect(position.x, position.y, position.x + size.x, position.y + size.y), m_BackgroundColor);
+	}
 
 	//
 	

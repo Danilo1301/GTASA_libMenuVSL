@@ -18,6 +18,7 @@ public:
     ~Window();
 
     /*1.0.0*/
+
     void SetPosition(CVector2D position);
     IItem* AddText(std::string text, CRGBA color);
     IItem* AddButton(std::string text, CRGBA color);
@@ -28,6 +29,7 @@ public:
     void SetToBeRemoved();
 
     /*1.1.0*/
+    
     bool GetIsActive();
     IItem* AddOptions(std::string text);
 

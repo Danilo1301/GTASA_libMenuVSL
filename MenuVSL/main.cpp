@@ -8,9 +8,10 @@
 
 #include "Log.h"
 #include "Input.h"
+#include "Localization.h"
 #include "opcodes.h"
 
-MYMODCFG(net.danilo1301.menuVSL, Menu VSL, 1.3.0, Danilo1301)
+MYMODCFG(net.danilo1301.menuVSL, Menu VSL, 1.4.0, Danilo1301)
 //MYMOD(net.rusjj.mymod.guid, AML Mod Template Without Config, 1.0, RusJJ)
 
 //NEEDGAME(net.rusjj.mygame)
@@ -178,7 +179,7 @@ extern "C" void OnModPreLoad()
 
     menuVSL->debug->visible = false;
     menuVSL->debug->AddLine("Interface MenuVSL registered");
-    menuVSL->debug->AddLine(MenuVSL::Instance->m_Credits.text);
+    menuVSL->debug->AddLine("~w~MenuVSL v" + ModConfig::GetModVersion() + " (by ~y~Danilo1301~w~)");
 
     Log::Level(LOG_LEVEL::LOG_BOTH) << "test_value: " << menuVSL->GetGlobalIntVariable("test_value") << std::endl;
 
@@ -316,10 +317,14 @@ extern "C" void OnModLoad()
     __reg_op_func(SET_GLOBAL_INT_VARIABLE, SET_GLOBAL_INT_VARIABLE);
     __reg_op_func(GET_GLOBAL_INT_VARIABLE, GET_GLOBAL_INT_VARIABLE);
 
-
     ModConfig::DefineVersions();
     ModConfig::ProcessVersionChanges_PreConfigLoad();
     ModConfig::Load();
+
+    char path[512];
+    sprintf(path, "%s/menuVSL/languages/", aml->GetConfigPath());
+    menuVSL->LoadLanguagesFolder(path);
+
     ModConfig::ProcessVersionChanges_PostConfigLoad();
     ModConfig::Save();
 

@@ -11,9 +11,9 @@
 
 #include "sdk/Image.h"
 
-struct MenuCredits {
-	std::string text = "";
-	bool hasShownCredits = false;
+struct ModCredits {
+    std::string text = "";
+    bool hasShownCredits = false;
 };
 
 class MenuVSL : public IMenuVSL {
@@ -42,7 +42,8 @@ public:
     
     CSprite2d testSprite;
 
-    MenuCredits m_Credits;
+    static std::vector<ModCredits> m_ModCredits;
+    static bool m_CanShownCredits;
 
     Window* m_ActiveWindow = NULL;
 
@@ -94,6 +95,17 @@ public:
     IWindow* AddVector2Window(IWindow* parent, CVector2D* vec, float min, float max, float addBy);
     IWindow* AddVectorWindow(IWindow* parent, CVector* vec, float min, float max, float addBy);
 
+    /* 1.4.0 */
+
+    IWindow* ShowSelectLanguageWindow(IWindow* parent = NULL);
+    void LoadLanguagesFolder(std::string folder);
+
+    std::string GetLanguageLineFormatted(std::string key, ...);
+
+    void ShowMessage(std::string key, int time);
+    
+    void AddModCredits(std::string key);
+
     //
 
     void Update(int dt);
@@ -111,7 +123,7 @@ public:
 
     static float GetFontHeight();
 
-    void ShowCredits(int time);
+    void ShowCredits(std::string text, int time);
     void RemovePopup(Popup* popup);
 
     static bool CreateImageFromFile(std::string const& path, Image*& img);

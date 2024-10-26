@@ -39,7 +39,7 @@ void Popup::Draw()
     //
 
     CVector2D pos = m_Position;
-    float width = 400;
+    float width = 500;
     float titleHeight = 30;
 
     menuVSL->DrawRectWithString(m_Title, pos, CVector2D(width, titleHeight), titleBoxColor, textColor, eFontAlignment::ALIGN_LEFT);

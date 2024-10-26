@@ -4,6 +4,10 @@
 #include <map>       
 #include <string>  
 #include <vector>
+#include <filesystem>
+
+//json
+#include "json/json.h"
 
 static int countSubstrOccurrences(const std::string& str, const std::string& substr) {
     int count = 0;
@@ -16,4 +20,9 @@ static int countSubstrOccurrences(const std::string& str, const std::string& sub
     }
 
     return count;
+}
+
+static bool stringExistsInVector(const std::vector<std::string>& vec, const std::string& str) {
+    // Usa std::find para verificar se a string existe no vetor
+    return std::find(vec.begin(), vec.end(), str) != vec.end();
 }

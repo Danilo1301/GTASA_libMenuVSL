@@ -87,7 +87,7 @@ IItem* Window::AddButton(std::string text, CRGBA color)
 
 IItem* Window::AddButton(std::string text)
 {
-	return AddButton(text, CRGBA(255, 255, 255));
+	return AddButton(text, CRGBA(0, 0, 0, 0));
 }
 
 IItem* Window::AddCheckbox(std::string text, bool* value)
@@ -209,39 +209,46 @@ void Window::Draw()
         m_BackButton->m_Visible = false;
     }
 
-    //window
-
-    float windowHeight = 110;
-
-    menuVSL->DrawRect(CRect(position.x, position.y, position.x + m_Width, position.y + windowHeight), m_TitleBackgroundColor);
-    menuVSL->DrawSprite(&MenuVSL::m_WindowTitleSprite, CVector2D(position.x, position.y), CVector2D(m_Width, windowHeight));
-
-    //change font
-    menuVSL->SetFontScale(1.5f * 2, 2.25f * 2);
-    MenuVSL::m_FontStyle = eFontStyle::FONT_GOTHIC;
+    // window
 
     float fontHeight = MenuVSL::m_FontScale.y * 10.0f;
-    CVector2D titlePosition = CVector2D(position.x + m_Width/2, position.y + windowHeight/2 - fontHeight / 2);
-    
-    menuVSL->DrawString(m_Title, titlePosition, CRGBA(255, 255, 255), eFontAlignment::ALIGN_CENTER);
-    
-    //reset font
-    menuVSL->ResetFontScale();
-    MenuVSL::m_FontStyle = MenuVSL::m_DefaultFontStyle;
 
-    position.y += windowHeight;
+    if(m_Title.size() > 0)
+    {
+        float windowHeight = 110;
+
+        menuVSL->DrawRect(CRect(position.x, position.y, position.x + m_Width, position.y + windowHeight), m_TitleBackgroundColor);
+        menuVSL->DrawSprite(&MenuVSL::m_WindowTitleSprite, CVector2D(position.x, position.y), CVector2D(m_Width, windowHeight));
+
+        //change font
+        menuVSL->SetFontScale(1.5f * 2, 2.25f * 2);
+        MenuVSL::m_FontStyle = eFontStyle::FONT_GOTHIC;
+
+        CVector2D titlePosition = CVector2D(position.x + m_Width/2, position.y + windowHeight/2 - fontHeight / 2);
+        
+        menuVSL->DrawString(m_Title, titlePosition, CRGBA(255, 255, 255), eFontAlignment::ALIGN_CENTER);
+        
+        //reset font
+        menuVSL->ResetFontScale();
+        MenuVSL::m_FontStyle = MenuVSL::m_DefaultFontStyle;
+
+        position.y += windowHeight;
+    }
 
     // sub title
 
-    float subTitleHeight = 40;
-    menuVSL->DrawRect(CRect(position.x, position.y, position.x + m_Width, position.y + subTitleHeight), m_SubTitleBackgroundColor);
-    
-    fontHeight = MenuVSL::m_FontScale.y * 10.0f;
-    CVector2D subTitlePosition = CVector2D(position.x + 5, position.y + subTitleHeight/2 - fontHeight / 2);
+    if(m_Title.size() > 0)
+    {
+        float subTitleHeight = 40;
+        menuVSL->DrawRect(CRect(position.x, position.y, position.x + m_Width, position.y + subTitleHeight), m_SubTitleBackgroundColor);
+        
+        fontHeight = MenuVSL::m_FontScale.y * 10.0f;
+        CVector2D subTitlePosition = CVector2D(position.x + 5, position.y + subTitleHeight/2 - fontHeight / 2);
 
-    menuVSL->DrawString(m_Title, subTitlePosition, CRGBA(255, 255, 255), eFontAlignment::ALIGN_LEFT);
+        menuVSL->DrawString(m_Title, subTitlePosition, CRGBA(255, 255, 255), eFontAlignment::ALIGN_LEFT);
 
-    position.y += subTitleHeight;
+        position.y += subTitleHeight;
+    }
 
     //
 
