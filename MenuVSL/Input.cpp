@@ -85,16 +85,19 @@ bool Input::IsTouchPressed()
     return *CTouchInterface_m_bTouchDown;
 }
 
-bool Input::IsPointInsideRect(CVector2D pos, CVector2D rectPos, CVector2D rectSize)
+bool Input::IsPointInsideRect(CVector2D pos, CVector2D rectPos, CVector2D rectSize, bool fixed)
 {
     //pos.x = MenuVSL::FixPositionX(pos.x);
     //pos.y = MenuVSL::FixPositionY(pos.y);
 
-    rectPos.x = MenuVSL::FixPositionX(rectPos.x);
-    rectPos.y = MenuVSL::FixPositionY(rectPos.y);
+    if(fixed)
+    {
+        rectPos.x = MenuVSL::FixPositionX(rectPos.x);
+        rectPos.y = MenuVSL::FixPositionY(rectPos.y);
 
-    rectSize.x = MenuVSL::FixPositionX(rectSize.x);
-    rectSize.y = MenuVSL::FixPositionY(rectSize.y);
+        rectSize.x = MenuVSL::FixPositionX(rectSize.x);
+        rectSize.y = MenuVSL::FixPositionY(rectSize.y);
+    }
 
     if (pos.x >= rectPos.x && pos.x <= rectPos.x + rectSize.x)
     {

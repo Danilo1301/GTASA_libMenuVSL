@@ -12,6 +12,8 @@
 #include "Vehicles.h"
 #include "Localization.h"
 #include "Messages.h"
+#include "ScreenButton.h"
+#include "TextureManager.h"
 
 #include "rw/rwcore.h"
 #include "rw/rpworld.h"
@@ -51,6 +53,7 @@ extern RwTexture* (*RwTextureRead)(const RwChar* name, const RwChar* maskname);
 MenuVSL* MenuVSL::Instance = new MenuVSL();
 std::vector<Window*> MenuVSL::m_Windows;
 std::vector<Popup*> MenuVSL::m_Popups;
+std::vector<ScreenButton*> MenuVSL::m_ScreenButtons;
 CVector2D MenuVSL::m_DefaultFontScale = CVector2D(1.5f, 2.25f); //deafult: (1.5, 2.25)
 CVector2D MenuVSL::m_FontScale = m_DefaultFontScale;
 eFontStyle MenuVSL::m_DefaultFontStyle = eFontStyle::FONT_SUBTITLES;
@@ -352,6 +355,23 @@ void MenuVSL::Update(int dt)
         Log::Level(LOG_LEVEL::LOG_BOTH) << "MenuVSL: Removed " << windowsToRemove.size() << " windows" << std::endl;
     }
 
+    // screen button
+
+    for(auto screenButton : m_ScreenButtons)
+    {
+        screenButton->Update(dt);
+    }
+
+    std::vector<ScreenButton*> screenButtonsToRemove; //to fix a crash that i still cant believe it never happened before
+    for (auto screenButton : m_ScreenButtons)
+    {
+        if(screenButton->m_CanBeRemoved) screenButtonsToRemove.push_back(screenButton);
+    }
+    for (auto screenButton : screenButtonsToRemove)
+    {
+        RemoveScreenButtonNow(screenButton);
+    }
+
     // credits
 
     if(m_CanShownCredits)
@@ -405,6 +425,25 @@ void MenuVSL::OnFirstUpdate()
 
     m_CanShownCredits = true;
     AddModCredits("~w~MenuVSL v" + ModConfig::GetModVersion() + " (by ~y~Danilo1301~w~)");
+
+    auto menuVSL = MenuVSL::Instance;
+
+    // TEST BUTTONS (SPAWN ON SCREEN)
+    
+    // char path[512];
+
+    // sprintf(path, "%s/menuVSL/assets/button_info.png", aml->GetConfigPath());
+    // auto buttonInfo = menuVSL->AddScreenButton(CVector2D(400, 200), path, CVector2D(80, 80));
+    // buttonInfo->onClick = [menuVSL, buttonInfo]() {
+    //     menuVSL->ShowMessage("Clicked info", 3000);
+    // };
+
+    // sprintf(path, "%s/modPolicia/assets/button_car.png", aml->GetConfigPath());
+    // auto buttonCar = menuVSL->AddScreenButton(CVector2D(500, 200), path, CVector2D(80, 80));
+    // buttonCar->m_Text = "Mais opcoes";
+    // buttonCar->onClick = [menuVSL, buttonCar]() {
+    //     menuVSL->ShowMessage("Clicked car", 3000);
+    // };
 }
 
 void MenuVSL::ProcessScripts()
@@ -441,6 +480,11 @@ void MenuVSL::Draw()
         if(!window->GetIsActive()) continue;
         
         window->Draw();
+    }
+
+    for(auto screenButton : MenuVSL::m_ScreenButtons)
+    {
+        screenButton->Draw();
     }
 
     bool drawPosInfo = debug->visible;
@@ -574,7 +618,7 @@ void MenuVSL::RemoveWindowNow(Window* window)
     if (m_ActiveWindow == window) m_ActiveWindow = NULL;
     if (window->m_Parent) m_ActiveWindow = (Window*)window->m_Parent;
 
-    if (window->m_OnCloseWindow) window->m_OnCloseWindow();
+    if (window->onCloseWindow) window->onCloseWindow();
 
     if(m_CleoWindows.count(window->m_Id)) m_CleoWindows.erase(window->m_Id);
 
@@ -588,6 +632,18 @@ void MenuVSL::RemoveWindowNow(Window* window)
     {
         m_Windows.erase(it);
         delete window;
+    }
+}
+
+void MenuVSL::RemoveScreenButtonNow(ScreenButton* screenButton)
+{
+    Log::Level(LOG_LEVEL::LOG_BOTH) << "Menu: RemoveScreenButtonNow" << std::endl;
+
+    auto it = std::find(m_ScreenButtons.begin(), m_ScreenButtons.end(), screenButton);
+    if (it != m_ScreenButtons.end())
+    {
+        m_ScreenButtons.erase(it);
+        delete screenButton;
     }
 }
 
@@ -916,7 +972,7 @@ IWindow* MenuVSL::AddColorWindow(IWindow* parent, CRGBA* color, std::function<vo
     return window;
 }
 
-IWindow* MenuVSL::AddVector2Window(IWindow* parent, CVector2D* vec, float min, float max, float addBy)
+IWindow* MenuVSL::AddVector2WindowEx(IWindow* parent, CVector2D* vec, float min, float max, float addBy, std::function<void()> onChange, std::function<void()> onBack)
 {
     auto window = AddWindow();
     window->m_Parent = parent;
@@ -925,31 +981,57 @@ IWindow* MenuVSL::AddVector2Window(IWindow* parent, CVector2D* vec, float min, f
     window->m_ShowBackButton = true;
 
     auto option_x = window->AddFloatRange("X", &vec->x, min, max, addBy);
-    auto option_y = window->AddFloatRange("Y", &vec->y, min, max, addBy);
-
     option_x->m_HoldToChange = true;
+    option_x->onValueChange = [onChange]() { onChange(); };
+
+    auto option_y = window->AddFloatRange("Y", &vec->y, min, max, addBy);
     option_y->m_HoldToChange = true;
+    option_y->onValueChange = [onChange]() { onChange(); };
+
+    window->onCloseWindow = [onBack]()
+    {
+        onBack();
+    };
+
+    return window;
+}
+
+IWindow* MenuVSL::AddVector2Window(IWindow* parent, CVector2D* vec, float min, float max, float addBy)
+{
+    return AddVector2WindowEx(parent, vec, min, max, addBy, []() {}, []() {});
+}
+
+IWindow* MenuVSL::AddVectorWindowEx(IWindow* parent, CVector* vec, float min, float max, float addBy, std::function<void()> onChange, std::function<void()> onBack)
+{
+    auto window = AddWindow();
+    window->m_Parent = parent;
+    window->m_Width = 400.0f;
+    window->m_Position = { 200, 200 };
+    window->m_ShowBackButton = true;
+
+    auto option_x = window->AddFloatRange("X", &vec->x, min, max, addBy);
+    option_x->m_HoldToChange = true;
+    option_x->onValueChange = [onChange]() { onChange(); };
+
+    auto option_y = window->AddFloatRange("Y", &vec->y, min, max, addBy);
+    option_y->m_HoldToChange = true;
+    option_y->onValueChange = [onChange]() { onChange(); };
+
+    auto option_z = window->AddFloatRange("Z", &vec->z, min, max, addBy);
+    option_z->m_HoldToChange = true;
+    option_z->onValueChange = [onChange]() { onChange(); };
+
+    window->onCloseWindow = [onBack]()
+    {
+        onBack();
+    };
 
     return window;
 }
 
 IWindow* MenuVSL::AddVectorWindow(IWindow* parent, CVector* vec, float min, float max, float addBy)
 {
-    auto window = AddWindow();
-    window->m_Parent = parent;
-    window->m_Width = 400.0f;
-    window->m_Position = { 200, 200 };
-    window->m_ShowBackButton = true;
-
-    auto option_x = window->AddFloatRange("X", &vec->x, min, max, addBy);
-    auto option_y = window->AddFloatRange("Y", &vec->y, min, max, addBy);
-    auto option_z = window->AddFloatRange("Z", &vec->z, min, max, addBy);
-
-    option_x->m_HoldToChange = true;
-    option_y->m_HoldToChange = true;
-    option_z->m_HoldToChange = true;
-
-    return window;
+    return AddVectorWindowEx(parent, vec, min, max, addBy, []() {}, []() {});
 }
 
 IWindow* MenuVSL::ShowSelectLanguageWindow(IWindow* parent)
@@ -1033,6 +1115,18 @@ void MenuVSL::AddModCredits(std::string key)
     ModCredits menuCredits;
     menuCredits.text = key;
     MenuVSL::m_ModCredits.push_back(menuCredits);
+}
+
+IScreenButton* MenuVSL::AddScreenButton(CVector2D position, std::string texture, CVector2D size)
+{
+    ScreenButton* screenButton = new ScreenButton();
+    screenButton->m_Position = position;
+    screenButton->m_Size = size;
+    screenButton->m_Sprite.m_pTexture = TextureManager::LoadTexture(texture, "screen_button");
+
+    m_ScreenButtons.push_back(screenButton);
+
+    return (IScreenButton*)screenButton;
 }
 
 //
@@ -1201,6 +1295,19 @@ void MenuVSL::CreateTestMenu()
 
     auto window = AddWindow();
 
+    auto button_screenButton = window->AddButton("Screen buttons");
+    button_screenButton->onClick = [menuVSL]() {
+
+        char path[512];
+
+        sprintf(path, "%s/menuVSL/test.png", aml->GetConfigPath());
+        auto screenButton = menuVSL->AddScreenButton(CVector2D(400, 200), path, CVector2D(80, 80));
+        screenButton->m_Text = "Test button";
+        screenButton->onClick = [screenButton]() {
+            screenButton->SetToBeRemoved();
+        };
+    };
+
     auto button_debug = window->AddButton("Toggle Debug");
     button_debug->onClick = [menuVSL]() {
         menuVSL->debug->visible = !menuVSL->debug->visible;
@@ -1267,7 +1374,7 @@ void MenuVSL::CreateTestMenu()
     auto selectMultipleItem = window->AddButton("Select multiple items");
     selectMultipleItem->onClick = [menuVSL, window] () {
         auto newWindow = menuVSL->AddWindowMultiOptionsString("Select multiple", window, &testSelectedOptions, &testAllOptions);
-        newWindow->m_OnCloseWindow = [menuVSL] () {
+        newWindow->onCloseWindow = [menuVSL] () {
             menuVSL->debug->AddLine("OnCloseWindow");
         };
     };

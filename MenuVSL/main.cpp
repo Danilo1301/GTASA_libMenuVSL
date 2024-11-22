@@ -11,7 +11,7 @@
 #include "Localization.h"
 #include "opcodes.h"
 
-MYMODCFG(net.danilo1301.menuVSL, Menu VSL, 1.4.0, Danilo1301)
+MYMODCFG(net.danilo1301.menuVSL, Menu VSL, 1.5.0, Danilo1301)
 //MYMOD(net.rusjj.mymod.guid, AML Mod Template Without Config, 1.0, RusJJ)
 
 //NEEDGAME(net.rusjj.mygame)

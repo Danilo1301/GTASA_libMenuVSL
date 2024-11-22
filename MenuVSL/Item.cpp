@@ -61,7 +61,7 @@ void Item::Update()
 {
     hasPressedThisFrame = false;
 
-	isPointerOver = Input::IsPointInsideRect(Input::GetTouchPos(), m_Position, m_Size);
+	isPointerOver = Input::IsPointInsideRect(Input::GetTouchPos(), m_Position, m_Size, true);
 
 	if (isPointerOver && Input::IsTouchPressed())
 	{

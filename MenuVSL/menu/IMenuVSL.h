@@ -9,6 +9,7 @@
 
 #include "IWindow.h"
 #include "IDebug.h"
+#include "IScreenButton.h"
 
 #define _debug menuVSL->debug
 #define GetLanguageLine menuVSL->GetLanguageLineFormatted
@@ -68,7 +69,10 @@ public:
     // using false is usefull with ConvertWorldPositionToScreenPosition
     virtual void SetDrawWithFixedScale(bool enabled) = 0;
 
+    virtual IWindow* AddVector2WindowEx(IWindow* parent, CVector2D* vec, float min, float max, float addBy, std::function<void()> onChange, std::function<void()> onBack) = 0;
     virtual IWindow* AddVector2Window(IWindow* parent, CVector2D* vec, float min, float max, float addBy) = 0;
+    
+    virtual IWindow* AddVectorWindowEx(IWindow* parent, CVector* vec, float min, float max, float addBy, std::function<void()> onChange, std::function<void()> onBack) = 0;
     virtual IWindow* AddVectorWindow(IWindow* parent, CVector* vec, float min, float max, float addBy) = 0;
 
     /* 1.4.0 */
@@ -81,4 +85,8 @@ public:
     virtual void ShowMessage(std::string key, int time) = 0;
 
     virtual void AddModCredits(std::string key) = 0;
+
+    /* 1.5.0 */
+
+    virtual IScreenButton* AddScreenButton(CVector2D position, std::string texture, CVector2D size) = 0;
 };

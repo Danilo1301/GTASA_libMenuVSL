@@ -5,6 +5,7 @@
 #include "Window.h"
 #include "Item.h"
 #include "Popup.h"
+#include "ScreenButton.h"
 
 #include <map>
 #include <string>
@@ -21,6 +22,7 @@ public:
     static MenuVSL* Instance;
     static std::vector<Window*> m_Windows;
     static std::vector<Popup*> m_Popups;
+    static std::vector<ScreenButton*> m_ScreenButtons;
     static CVector2D m_DefaultFontScale;
     static CVector2D m_FontScale;
     static eFontStyle m_DefaultFontStyle;
@@ -92,7 +94,10 @@ public:
 
     void SetDrawWithFixedScale(bool enabled);
 
+    IWindow* AddVector2WindowEx(IWindow* parent, CVector2D* vec, float min, float max, float addBy, std::function<void()> onChange, std::function<void()> onBack);
     IWindow* AddVector2Window(IWindow* parent, CVector2D* vec, float min, float max, float addBy);
+    
+    IWindow* AddVectorWindowEx(IWindow* parent, CVector* vec, float min, float max, float addBy, std::function<void()> onChange, std::function<void()> onBack);
     IWindow* AddVectorWindow(IWindow* parent, CVector* vec, float min, float max, float addBy);
 
     /* 1.4.0 */
@@ -106,6 +111,10 @@ public:
     
     void AddModCredits(std::string key);
 
+    /* 1.5.0 */
+
+    IScreenButton* AddScreenButton(CVector2D position, std::string texture, CVector2D size);
+
     //
 
     void Update(int dt);
@@ -117,6 +126,7 @@ public:
     void VehicleRenderAfter(void* pVehicle);
     
     void RemoveWindowNow(Window* window);
+    void RemoveScreenButtonNow(ScreenButton* screenButton);
 
     static int AddCleoWindow();
     static int AddCleoItem(Item* item);
