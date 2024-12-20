@@ -11,7 +11,7 @@
 #include "Localization.h"
 #include "opcodes.h"
 
-MYMODCFG(net.danilo1301.menuVSL, Menu VSL, 1.5.0, Danilo1301)
+MYMODCFG(net.danilo1301.menuVSL, Menu VSL, 1.5.1, Danilo1301)
 //MYMOD(net.rusjj.mymod.guid, AML Mod Template Without Config, 1.0, RusJJ)
 
 //NEEDGAME(net.rusjj.mygame)
@@ -140,6 +140,8 @@ DECL_HOOK(void*, UpdateGameLogic, uintptr_t a1)
 
     MenuVSL::Instance->Update(dt);
 
+    MenuVSL::Instance->ProcessScripts();
+    
     Log::Level(LOG_LEVEL::LOG_UPDATE) << "UpdateGameLogic end" << std::endl;
 
     return UpdateGameLogic(a1);
@@ -152,13 +154,18 @@ DECL_HOOKv(RenderVehicle, void* self)
     MenuVSL::Instance->VehicleRenderAfter(self);
 }
 
-DECL_HOOKv(CTheScripts_Process)
-{
-    Log::Level(LOG_LEVEL::LOG_UPDATE) << "CTheScripts_Process" << std::endl;
-    CTheScripts_Process();
-    MenuVSL::Instance->ProcessScripts();
-    Log::Level(LOG_LEVEL::LOG_UPDATE) << "CTheScripts_Process end" << std::endl;
-}
+/*
+CRASHES ON SAMP, MFUCKER, but ok, I have UpdateGameLogic
+OK, NOW IT CRASHES ON SINGLEPLYAER, fuck it we ball
+*/
+// DECL_HOOKv(CTheScripts_Process)
+// {
+//     Log::Level(LOG_LEVEL::LOG_UPDATE) << "CTheScripts_Process" << std::endl;
+//     CTheScripts_Process();
+//     Log::Level(LOG_LEVEL::LOG_UPDATE) << "CTheScripts_Process fn called" << std::endl;
+//     MenuVSL::Instance->ProcessScripts();
+//     Log::Level(LOG_LEVEL::LOG_UPDATE) << "CTheScripts_Process end" << std::endl;
+// }
 
 extern "C" void OnModPreLoad()
 {
@@ -281,10 +288,11 @@ extern "C" void OnModLoad()
 
 
     HOOKPLT(UpdateGameLogic, gameAddr + 0x66FE58);
-    HOOKPLT(PreRenderEnd, gameAddr + 0x674188);
-    //HOOKPLT(PreRenderEnd, gameAddr + BYBIT(0x674188, 0x846E90));
     HOOK(RenderVehicle, aml->GetSym(hGTASA, "_ZN8CVehicle6RenderEv"));
-    HOOK(CTheScripts_Process, aml->GetSym(hGTASA, "_ZN11CTheScripts7ProcessEv"));
+    //HOOK(CTheScripts_Process, aml->GetSym(hGTASA, "_ZN11CTheScripts7ProcessEv"));
+    HOOKPLT(PreRenderEnd, gameAddr + 0x674188);
+    
+    //HOOKPLT(PreRenderEnd, gameAddr + BYBIT(0x674188, 0x846E90));
 
     //HOOK(CHud_Draw, aml->GetSym(hGTASA, "_ZN4CHud4DrawEv"));
 

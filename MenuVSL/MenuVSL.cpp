@@ -448,6 +448,8 @@ void MenuVSL::OnFirstUpdate()
 
 void MenuVSL::ProcessScripts()
 {
+    //Log::Level(LOG_LEVEL::LOG_UPDATE) << "Processing other " << OnProcessScriptsFunctions.size() << " scripts..." << std::endl;
+
     for(auto fn : OnProcessScriptsFunctions) fn();
 }
 

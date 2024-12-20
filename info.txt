@@ -45,6 +45,8 @@ Initial release
 [1.5.0]
 [X] ADD: screen button
 
+[1.5.1]
+[X] FIX: crash with CTheScripts_Process
 
 resolver bug do menu clicando em um item qualquer no momento q vc abre ele equanto ta andando
 adicionar um options->SetCurrentOptionByIndex()
