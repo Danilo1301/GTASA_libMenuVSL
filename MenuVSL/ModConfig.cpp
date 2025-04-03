@@ -242,7 +242,10 @@ void ModConfig::Save()
     {
         value["language"] = Localization::CurrentLanguage;
     }
-
+    
+    value["menu_screen_width"] = MenuVSL::m_GTAScreenSize.x;
+    value["menu_screen_height"] = MenuVSL::m_GTAScreenSize.y;
+    
     WriteToFile(dataFile, value);
 }
 
@@ -263,6 +266,16 @@ void ModConfig::Load()
         if(!value["language"].isNull())
         {
             Localization::CurrentLanguage = value["language"].asString();
+        }
+
+        if(!value["menu_screen_width"].isNull())
+        {
+            MenuVSL::m_GTAScreenSize.x = value["menu_screen_width"].asFloat();
+        }
+
+        if(!value["menu_screen_height"].isNull())
+        {
+            MenuVSL::m_GTAScreenSize.y = value["menu_screen_height"].asFloat();
         }
     }
 }
@@ -297,6 +310,7 @@ void ModConfig::DefineVersions()
     VersionControl::AddVersion("1.4.0");
     VersionControl::AddVersion("1.5.0");
     VersionControl::AddVersion("1.5.1");
+    VersionControl::AddVersion("1.5.2");
 
     VersionControl::SetVersion(ReadVersionFile(), GetModVersion());
 }
