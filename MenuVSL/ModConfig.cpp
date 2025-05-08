@@ -311,6 +311,7 @@ void ModConfig::DefineVersions()
     VersionControl::AddVersion("1.5.0");
     VersionControl::AddVersion("1.5.1");
     VersionControl::AddVersion("1.5.2");
+    VersionControl::AddVersion("1.5.3");
 
     VersionControl::SetVersion(ReadVersionFile(), GetModVersion());
 }

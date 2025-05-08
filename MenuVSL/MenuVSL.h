@@ -115,12 +115,17 @@ public:
 
     IScreenButton* AddScreenButton(CVector2D position, std::string texture, CVector2D size);
 
+    /* 1.5.3 */
+
+    IWindow* AddWindow(IWindow* parent);
+
     //
 
     void Update(int dt);
     void OnFirstUpdate();
     void ProcessScripts();
     void Draw();
+    void OnFirstDraw();
 
     void VehicleRenderBefore(void* pVehicle);
     void VehicleRenderAfter(void* pVehicle);
@@ -138,7 +143,8 @@ public:
 
     static bool CreateImageFromFile(std::string const& path, Image*& img);
 
-    void CreateTestMenu();
+    void CreateMainMenu();
+    void CreateTestMenu(IWindow* parent);
 
     static float FixPositionX(float x);
     static float FixPositionY(float y);

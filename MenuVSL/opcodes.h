@@ -30,25 +30,24 @@
 extern cleo_ifs_t* cleo;
 extern void (*UpdateCompareFlag)(void*, uint8_t);
 
-__decl_op(MENU_VSL_ADD_WINDOW, 0x0FE0); // 0FE0=4,%4d% = menu_vsl_add_window title %1g% x %2d% y %3d%
-__decl_op(MENU_VSL_TEST, 0x0FE1); // 0FE1=3,%3d% = menu_vsl_test %1d% %2g%
-__decl_op(MENU_VSL_ADD_TEXT, 0x0FE2); // 0FE2=3,%3d% = menu_vsl_add_text window %1d% text %2g%
-__decl_op(MENU_VSL_ADD_BUTTON, 0x0FE3); // 0FE3=3,%3d% = menu_vsl_add_button window %1d% text %2g%
-__decl_op(MENU_VSL_IS_BUTTON_JUST_PRESSED, 0x0FE4); //0FE4=1,menu_vsl_is_button_just_pressed %1d%
-__decl_op(MENU_VSL_REMOVE_WINDOW, 0x0FE5); // 0FE5=1,menu_vsl_remove_window %1d%
-__decl_op(MENU_VSL_ADD_INT_RANGE, 0x0FE6); // 0FE6=7,%7d% = menu_vsl_add_int_range window %1d% text %2g% value %3d% min %4d% max %5d% add_by %6d%
-__decl_op(MENU_VSL_ADD_FLOAT_RANGE, 0x0FE7); // 0FE7=7,%7d% = menu_vsl_add_float_range window %1d% text %2g% value %3d% min %4d% max %5d% add_by %6d%
-__decl_op(MENU_VSL_GET_INT_VALUE, 0x0FE8); // 0FE8=2,%2g% = menu_vsl_get_int_value item %1d%
-__decl_op(MENU_VSL_GET_FLOAT_VALUE, 0x0FE9); // 0FE9=2,%2g% = menu_vsl_get_float_value item %1d%
-__decl_op(MENU_VSL_SET_HOLD_TO_CHANGE, 0x0FEA); // 0FEA=2,menu_vsl_set_hold_to_change item %1d% value %2d%
-__decl_op(MENU_VSL_SET_DEBUG_VISIBLE, 0x0FEB); // 0FEB=1,menu_vsl_set_debug_visible %1d%
-__decl_op(MENU_VSL_ADD_DEBUG_INT, 0x0FEC); // 0FEC=2,menu_vsl_add_debug_int %1g% %2d%
-__decl_op(MENU_VSL_ADD_DEBUG_FLOAT, 0x0FED); // 0FED=2,menu_vsl_add_debug_float %1g% %2d%
-__decl_op(MENU_VSL_ADD_CHECKBOX, 0x0FEE); // 0FEE=4,%4d% = menu_vsl_add_checkbox window %1d% text %2g% value %3d%
-__decl_op(MENU_VSL_SET_WINDOW_BACKGROUND, 0x0FEF); // 0FEF=5,menu_vsl_set_window_background window %1d% r %2d% g %3d% b %4d% a %5d%
-__decl_op(SET_GLOBAL_INT_VARIABLE, 0x0FF0); // 0FF0=2,set_global_int_variable %1g% value %2d%
-__decl_op(GET_GLOBAL_INT_VARIABLE, 0x0FF1); // 0FF1=2,%2d% = get_global_int_variable %1g%
-
+__decl_op(MENU_VSL_ADD_WINDOW, 0x4D70); // 4D70=4,%4d% = menu_vsl_add_window title %1g% x %2d% y %3d%
+__decl_op(MENU_VSL_TEST, 0x4D71); // 4D71=3,%3d% = menu_vsl_test %1d% %2g%
+__decl_op(MENU_VSL_ADD_TEXT, 0x4D72); // 4D72=3,%3d% = menu_vsl_add_text window %1d% text %2g%
+__decl_op(MENU_VSL_ADD_BUTTON, 0x4D73); // 4D73=3,%3d% = menu_vsl_add_button window %1d% text %2g%
+__decl_op(MENU_VSL_IS_BUTTON_JUST_PRESSED, 0x4D74); // 4D74=1,menu_vsl_is_button_just_pressed %1d%
+__decl_op(MENU_VSL_REMOVE_WINDOW, 0x4D75); // 4D75=1,menu_vsl_remove_window %1d%
+__decl_op(MENU_VSL_ADD_INT_RANGE, 0x4D76); // 4D76=7,%7d% = menu_vsl_add_int_range window %1d% text %2g% value %3d% min %4d% max %5d% add_by %6d%
+__decl_op(MENU_VSL_ADD_FLOAT_RANGE, 0x4D77); // 4D77=7,%7d% = menu_vsl_add_float_range window %1d% text %2g% value %3d% min %4d% max %5d% add_by %6d%
+__decl_op(MENU_VSL_GET_INT_VALUE, 0x4D78); // 4D78=2,%2g% = menu_vsl_get_int_value item %1d%
+__decl_op(MENU_VSL_GET_FLOAT_VALUE, 0x4D79); // 4D79=2,%2g% = menu_vsl_get_float_value item %1d%
+__decl_op(MENU_VSL_SET_HOLD_TO_CHANGE, 0x4D7A); // 4D7A=2,menu_vsl_set_hold_to_change item %1d% value %2d%
+__decl_op(MENU_VSL_SET_DEBUG_VISIBLE, 0x4D7B); // 4D7B=1,menu_vsl_set_debug_visible %1d%
+__decl_op(MENU_VSL_ADD_DEBUG_INT, 0x4D7C); // 4D7C=2,menu_vsl_add_debug_int %1g% %2d%
+__decl_op(MENU_VSL_ADD_DEBUG_FLOAT, 0x4D7D); // 4D7D=2,menu_vsl_add_debug_float %1g% %2d%
+__decl_op(MENU_VSL_ADD_CHECKBOX, 0x4D7E); // 4D7E=4,%4d% = menu_vsl_add_checkbox window %1d% text %2g% value %3d%
+__decl_op(MENU_VSL_SET_WINDOW_BACKGROUND, 0x4D7F); // 4D7F=5,menu_vsl_set_window_background window %1d% r %2d% g %3d% b %4d% a %5d%
+__decl_op(SET_GLOBAL_INT_VARIABLE, 0x4D80); // 4D80=2,set_global_int_variable %1g% value %2d%
+__decl_op(GET_GLOBAL_INT_VARIABLE, 0x4D81); // 4D81=2,%2d% = get_global_int_variable %1g%
 
 bool bool1 = true;
 int int1 = 5;

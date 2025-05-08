@@ -87,6 +87,8 @@ unsigned short* textGxt = new unsigned short[0xFF];
 
 int blockedTimeToClickMenu = 0;
 
+bool firstTimeDraw = true;
+
 void* LoadRwTextureFromPNG(const char* fn)
 {
     //RwTexture* pTexture = NULL;
@@ -158,6 +160,15 @@ IWindow* MenuVSL::AddWindow()
     m_ActiveWindow = window;
 
     blockedTimeToClickMenu = 500;
+
+    return window;
+}
+
+IWindow* MenuVSL::AddWindow(IWindow* parent)
+{
+    IWindow* window = AddWindow();
+    window->m_Parent = parent;
+    window->m_ShowBackButton = true;
 
     return window;
 }
@@ -293,7 +304,7 @@ void MenuVSL::Update(int dt)
     {
         SetGlobalIntVariable("show_test_menuVSL", 0);
 
-        CreateTestMenu();
+        CreateMainMenu();
     }
 
     Vehicles::TryFindNewVehicles();
@@ -424,7 +435,7 @@ void MenuVSL::OnFirstUpdate()
     }
 
     m_CanShownCredits = true;
-    AddModCredits("~w~MenuVSL v" + ModConfig::GetModVersion() + " (by ~y~Danilo1301~w~)");
+    
 
     auto menuVSL = MenuVSL::Instance;
 
@@ -455,6 +466,12 @@ void MenuVSL::ProcessScripts()
 
 void MenuVSL::Draw()
 {
+    if(firstTimeDraw)
+    {
+        firstTimeDraw = false;
+        OnFirstDraw();
+    }
+
     m_DrawWithFixedScale = true; // FIX SCALE
     
     for(auto fn : OnRenderFunctions) fn();
@@ -599,6 +616,18 @@ void MenuVSL::Draw()
     //
     
     m_DrawWithFixedScale = true;
+}
+
+void MenuVSL::OnFirstDraw()
+{
+    menuVSL->debug->AddLine("~w~- MenuVSL v" + ModConfig::GetModVersion() + " (by ~y~Danilo1301~w~)");
+
+    for(int i = 0; i < MenuVSL::m_ModCredits.size(); i++)
+    {
+        auto modCredits = &MenuVSL::m_ModCredits[i];
+
+        menuVSL->debug->AddLine(modCredits->text);
+    }
 }
 
 void MenuVSL::VehicleRenderBefore(void* pVehicle)
@@ -1116,7 +1145,7 @@ void MenuVSL::AddModCredits(std::string key)
 {
     ModCredits menuCredits;
     menuCredits.text = key;
-    MenuVSL::m_ModCredits.push_back(menuCredits);
+    m_ModCredits.push_back(menuCredits);
 }
 
 IScreenButton* MenuVSL::AddScreenButton(CVector2D position, std::string texture, CVector2D size)
@@ -1275,39 +1304,17 @@ static std::vector<std::string> testSelectedOptions;
 static CVector2D vec2(1.0f, 2.0f);
 static CVector vec3(1.0f, 2.0f, 3.0f);
 
-void MenuVSL::CreateTestMenu()
+void MenuVSL::CreateMainMenu()
 {
     Log::Level(LOG_LEVEL::LOG_BOTH) << "Creating test menu" << std::endl;
 
     auto menuVSL = this;
 
-    testStrVec.clear();
-    testStr = "none";
-    testAllOptions.clear();
-    testAllOptions.push_back("Op 1");
-    testAllOptions.push_back("Op 2");
-    testAllOptions.push_back("Op 3");
-    testSelectedOptions.clear();
-    testSelectedOptions.push_back(testAllOptions[1]);
-    
-    for(int i = 0; i < 20; i++)
-    {
-        testStrVec.push_back("String " + std::to_string(i));
-    }
-
     auto window = AddWindow();
 
-    auto button_screenButton = window->AddButton("Screen buttons");
-    button_screenButton->onClick = [menuVSL]() {
-
-        char path[512];
-
-        sprintf(path, "%s/menuVSL/test.png", aml->GetConfigPath());
-        auto screenButton = menuVSL->AddScreenButton(CVector2D(400, 200), path, CVector2D(80, 80));
-        screenButton->m_Text = "Test button";
-        screenButton->onClick = [screenButton]() {
-            screenButton->SetToBeRemoved();
-        };
+    auto button_language = window->AddButton("Change Language");
+    button_language->onClick = [menuVSL, window]() {
+        menuVSL->ShowSelectLanguageWindow(window);
     };
 
     auto button_debug = window->AddButton("Toggle Debug");
@@ -1328,11 +1335,50 @@ void MenuVSL::CreateTestMenu()
         menuVSL->ShowMessage("Debug cleared", 2000);
     };
 
-    auto button_language = window->AddButton(Localization::GetLineFormatted("test_line"));
-    button_language->onClick = [menuVSL, window]() {
-        menuVSL->ShowSelectLanguageWindow(window);
+    auto button_test = window->AddButton("Tests");
+    button_test->onClick = [menuVSL, window]() {
+        menuVSL->CreateTestMenu(window);
     };
+
+    auto close = window->AddButton("~r~Close");
+    close->onClick = [window]() {
+        window->SetToBeRemoved();
+    };
+}
+
+void MenuVSL::CreateTestMenu(IWindow* parent)
+{
+    auto menuVSL = this;
+
+    auto window = AddWindow(parent);
+
+    testStrVec.clear();
+    testStr = "none";
+    testAllOptions.clear();
+    testAllOptions.push_back("Op 1");
+    testAllOptions.push_back("Op 2");
+    testAllOptions.push_back("Op 3");
+    testSelectedOptions.clear();
+    testSelectedOptions.push_back(testAllOptions[1]);
     
+    for(int i = 0; i < 20; i++)
+    {
+        testStrVec.push_back("String " + std::to_string(i));
+    }
+
+    auto button_screenButton = window->AddButton("Screen buttons");
+    button_screenButton->onClick = [menuVSL]() {
+
+        char path[512];
+
+        sprintf(path, "%s/menuVSL/test.png", aml->GetConfigPath());
+        auto screenButton = menuVSL->AddScreenButton(CVector2D(400, 200), path, CVector2D(80, 80));
+        screenButton->m_Text = "Test button";
+        screenButton->onClick = [screenButton]() {
+            screenButton->SetToBeRemoved();
+        };
+    };
+
     auto color = window->AddButton("Select color");
     color->AddColorIndicator(&testColor);
     color->AddColorIndicator(&testColor);
@@ -1399,7 +1445,7 @@ void MenuVSL::CreateTestMenu()
         window->AddButton("> ~y~Test item " + std::to_string(i));
     }
 
-    auto close = window->AddButton("~r~Close");
+    auto close = window->AddButton("~r~Back");
     close->onClick = [window]() {
         window->SetToBeRemoved();
     };

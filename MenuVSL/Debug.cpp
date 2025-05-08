@@ -34,7 +34,7 @@ void Debug::Draw()
 
     for(auto line : lines)
     {
-       menuVSL->DrawString(line, CVector2D(x, y), CRGBA(255, 255, 0), eFontAlignment::ALIGN_LEFT);
+       menuVSL->DrawString(line, CVector2D(x, y), CRGBA(255, 255, 255), eFontAlignment::ALIGN_LEFT);
 
        y += 25;
     }

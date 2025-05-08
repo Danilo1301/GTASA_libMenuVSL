@@ -89,4 +89,8 @@ public:
     /* 1.5.0 */
 
     virtual IScreenButton* AddScreenButton(CVector2D position, std::string texture, CVector2D size) = 0;
+
+    /* 1.5.3 */
+
+    virtual IWindow* AddWindow(IWindow* parent) = 0;
 };

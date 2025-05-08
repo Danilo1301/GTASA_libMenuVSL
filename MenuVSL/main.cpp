@@ -11,7 +11,7 @@
 #include "Localization.h"
 #include "opcodes.h"
 
-MYMODCFG(net.danilo1301.menuVSL, Menu VSL, 1.5.2, Danilo1301)
+MYMODCFG(net.danilo1301.menuVSL, Menu VSL, 1.5.3, Danilo1301)
 //MYMOD(net.rusjj.mymod.guid, AML Mod Template Without Config, 1.0, RusJJ)
 
 //NEEDGAME(net.rusjj.mygame)
@@ -111,17 +111,17 @@ DECL_HOOKv(CHud_Draw)
 
 DECL_HOOK(void, PreRenderEnd, void* self)
 {
-    Log::Level(LOG_LEVEL::LOG_UPDATE) << "PreRenderEnd" << std::endl;
+    //Log::Level(LOG_LEVEL::LOG_UPDATE) << "PreRenderEnd" << std::endl;
     PreRenderEnd(self);
 
     MenuVSL::Instance->Draw();
 
-    Log::Level(LOG_LEVEL::LOG_UPDATE) << "PreRenderEnd end" << std::endl;
+    //Log::Level(LOG_LEVEL::LOG_UPDATE) << "PreRenderEnd end" << std::endl;
 }
 
 DECL_HOOK(void*, UpdateGameLogic, uintptr_t a1)
 {
-    Log::Level(LOG_LEVEL::LOG_UPDATE) << "UpdateGameLogic" << std::endl;
+    //Log::Level(LOG_LEVEL::LOG_UPDATE) << "UpdateGameLogic" << std::endl;
 
     auto time = *m_snTimeInMilliseconds;
     if(prevTime == 0) prevTime = time;
@@ -142,7 +142,7 @@ DECL_HOOK(void*, UpdateGameLogic, uintptr_t a1)
 
     MenuVSL::Instance->ProcessScripts();
     
-    Log::Level(LOG_LEVEL::LOG_UPDATE) << "UpdateGameLogic end" << std::endl;
+    //Log::Level(LOG_LEVEL::LOG_UPDATE) << "UpdateGameLogic end" << std::endl;
 
     return UpdateGameLogic(a1);
 }
@@ -178,15 +178,15 @@ extern "C" void OnModPreLoad()
 
     Log::Level(LOG_LEVEL::LOG_BOTH) << "Preload()" << std::endl;
     Log::Level(LOG_LEVEL::LOG_BOTH) << "AML headers: 1.0.3.1" << std::endl;
-    Log::Level(LOG_LEVEL::LOG_BOTH) << "Test #3" << std::endl;
+    //Log::Level(LOG_LEVEL::LOG_BOTH) << "Test #3" << std::endl;
 
     Log::Level(LOG_LEVEL::LOG_BOTH) << "Registering interface 'MenuVSL'..." << std::endl;
 
     RegisterInterface("MenuVSL", menuVSL);
 
     menuVSL->debug->visible = false;
-    menuVSL->debug->AddLine("Interface MenuVSL registered");
-    menuVSL->debug->AddLine("~w~MenuVSL v" + ModConfig::GetModVersion() + " (by ~y~Danilo1301~w~)");
+    //menuVSL->debug->AddLine("Interface MenuVSL registered");
+    
 
     Log::Level(LOG_LEVEL::LOG_BOTH) << "test_value: " << menuVSL->GetGlobalIntVariable("test_value") << std::endl;
 
@@ -198,7 +198,7 @@ extern "C" void OnModPreLoad()
 
     Log::Level(LOG_LEVEL::LOG_BOTH) << "Preload() END" << std::endl;
 
-    menuVSL->debug->AddLine("Preloaded!");
+    //menuVSL->debug->AddLine("Preloaded!");
 }
 
 extern "C" void OnModLoad()
@@ -225,9 +225,9 @@ extern "C" void OnModLoad()
 
     if(sautils)
     {
-        menuVSL->debug->AddLine("SAUtils loaded!");
+        //menuVSL->debug->AddLine("SAUtils loaded!");
 
-        sautils->AddSliderItem(eTypeOfSettings::SetType_Mods, "MenuVSL (by Danilo1301)", 0, 0, 1);
+        //sautils->AddSliderItem(eTypeOfSettings::SetType_Mods, "MenuVSL (by Danilo1301)", 0, 0, 1);
     }
 
     Log::Level(LOG_LEVEL::LOG_BOTH) << "----------------------------" << std::endl;
@@ -336,9 +336,7 @@ extern "C" void OnModLoad()
     ModConfig::ProcessVersionChanges_PostConfigLoad();
     ModConfig::Save();
 
-    Log::Level(LOG_LEVEL::LOG_BOTH) << "Load() END" << std::endl;
-
-    menuVSL->debug->AddLine("Loaded!");
+    //menuVSL->debug->AddLine("Loaded!");
 
     /*
     menuVSL->AddOnProcessScripts([] () {

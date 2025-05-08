@@ -1,0 +1,72 @@
+{$CLEO .csi}
+
+//Made by Danilo1301
+
+:DEMOTEXT
+03A4: name_thread "TestMenuVSL"
+wait 0
+
+:DEMOTEXT_1
+wait 0
+if
+0256: player $PLAYER_CHAR defined 
+004D: jump_if_false @DEMOTEXT_1
+
+//4D71: $ID = menu_vsl_test 5 "nice text"
+
+4D7B: menu_vsl_set_debug_visible 1
+4D7C: menu_vsl_add_debug_int "Test debug ~1~ (with int)" 123
+4D7C: menu_vsl_add_debug_int "Test debug (string only)" 0
+4D7D: menu_vsl_add_debug_float "Test debug ~1~ (with float)" 0.32
+
+4D70: $Window1 = menu_vsl_add_window title "Nice window" x 450 y 200
+4D7F: menu_vsl_set_window_background window $Window1 r 108 g 94 b 229 a 255
+
+4D72: $Text1 = menu_vsl_add_text window $Window1 text "My ~y~color~r~ful ~w~text! :D"
+
+04C4: store_coords_to $X $Y $Z from_actor $PLAYER_ACTOR with_offset 0.0 0.0 0.0
+
+4D77: $FloatRange1 = menu_vsl_add_float_range window $Window1 text "My float range" value $X min -10000.0 max 10000.0 add_by 1.0
+4D7A: menu_vsl_set_hold_to_change item $FloatRange1 value 1
+
+4D76: $IntRange1 = menu_vsl_add_int_range window $Window1 text "My int range" value 25 min 0 max 100 add_by 1
+
+$CheckboxValue = 1
+
+4D7E: $Checkbox1 = menu_vsl_add_checkbox window $Window1 text "My checkbox" value $CheckboxValue
+
+4D73: $Button1 = menu_vsl_add_button window $Window1 text "~w~> ~r~Close"
+
+//test global int variable
+$TestInt = 5
+4D80: set_global_int_variable "TestMenu_int" value $TestInt
+4D81: $TestInt = get_global_int_variable "TestMenu_int"
+01E3: show_text_1number_styled GXT 'MVSL4' number $TestInt time 1000 style 1
+
+:LOOP
+wait 0 
+
+if 4D74: menu_vsl_is_button_just_pressed $Button1
+then
+    jump @REMOVE
+end
+
+4D78: $CheckboxValue = menu_vsl_get_int_value item $Checkbox1
+
+4D79: $X = menu_vsl_get_float_value item $FloatRange1
+
+if $CheckboxValue == 1
+then
+    00A1: put_actor $PLAYER_ACTOR at $X $Y $Z
+else
+    00A1: put_actor $PLAYER_ACTOR at $X $Y 100.0
+end
+
+jump @LOOP
+
+:REMOVE
+
+4D75: menu_vsl_remove_window $Window1
+4D7B: menu_vsl_set_debug_visible 0
+
+004E: terminate_this_script
